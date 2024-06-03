@@ -125,3 +125,7 @@ This repository is currently maintained by [Wenke Huang](mailto:wenkehuang@whu.e
 
 *I hope all players have fun.*
 
+## Summer2024 BSU REU
+
+Stuff added to this project by us here for now.
+
