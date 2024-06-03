@@ -129,3 +129,5 @@ This repository is currently maintained by [Wenke Huang](mailto:wenkehuang@whu.e
 
 Stuff added to this project by us here for now.
 
+Minor update test.
+
