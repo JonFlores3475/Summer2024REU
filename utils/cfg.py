@@ -263,6 +263,10 @@ CFG.FedAVG = CN()
 CFG.FedAVG.local_method = 'BaseLocal'
 CFG.FedAVG.global_method = 'BaseSever'
 
+CFG.DelphiflMedian = CN()
+CFG.DelphiflMedian.local_method = 'BaseLocal'
+CFG.DelphiflMedian.global_method = 'DelphiflMedianServer'
+
 # FedProx
 CFG.FedProx = CN()
 CFG.FedProx.local_method = 'FedProxLocal'

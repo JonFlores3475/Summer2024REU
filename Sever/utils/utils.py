@@ -199,7 +199,7 @@ def geometric_median_update(points, alphas, maxiter=4, eps=1e-5, verbose=False, 
     return median, num_oracle_calls, logs
 
 
-def delphiflmedian(users_grads, users_count, corrupted_count):
+def DelphiflMedian(users_grads, users_count, corrupted_count):
     non_malicious_count = users_count - corrupted_count
     median_users_grads = []
     all_error = []
