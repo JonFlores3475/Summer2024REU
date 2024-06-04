@@ -48,4 +48,6 @@ tqdm\
 typing_extensions\
 tzdata\
 yacs\
-yarl
+yarl\
+dill\
+multiprocessing
