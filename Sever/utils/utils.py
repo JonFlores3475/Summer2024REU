@@ -42,7 +42,8 @@ def _krum_create_distances(users_grads):
 
 def krum(users_grads, users_count, corrupted_count, distances=None, return_index=False):
     if not return_index:
-        assert users_count >= 2 * corrupted_count + 1, ('users_count>=2*corrupted_count + 3', users_count, corrupted_count)
+        assert users_count >= 2 * corrupted_count + 1, (
+        'users_count>=2*corrupted_count + 3', users_count, corrupted_count)
     non_malicious_count = users_count - corrupted_count
     minimal_error = 1e20
     minimal_error_index = -1
@@ -83,7 +84,8 @@ def multi_krum(users_grads, users_count, corrupted_count, n):
     return mean_users_grads
 
 
-def fools_gold(this_delta, summed_deltas, sig_features_idx, model, topk_prop=0, importance=False, importanceHard=False, clip=0):
+def fools_gold(this_delta, summed_deltas, sig_features_idx, model, topk_prop=0, importance=False, importanceHard=False,
+               clip=0):
     # Take all the features of sig_features_idx for each clients
     sd = summed_deltas.copy()
     sig_filtered_deltas = np.take(sd, sig_features_idx, axis=1)
@@ -138,6 +140,7 @@ def fools_gold(this_delta, summed_deltas, sig_features_idx, model, topk_prop=0, 
     # delta = np.reshape(this_delta, (n, d))
 
     return np.dot(this_delta.T, wv)
+
 
 def weighted_average_oracle(points, weights):
     tot_weights = np.sum(weights)
@@ -194,3 +197,38 @@ def geometric_median_update(points, alphas, maxiter=4, eps=1e-5, verbose=False, 
         if abs(prev_obj_val - obj_val) < ftol * obj_val:
             break
     return median, num_oracle_calls, logs
+
+
+def delphiflmedian(users_grads, users_count, corrupted_count):
+    non_malicious_count = users_count - corrupted_count
+    median_users_grads = []
+    all_error = []
+    current_grads = users_grads.copy()
+    iqr = []
+
+    distances = _krum_create_distances(users_grads)
+    for user in distances.keys():
+        errors = sorted(distances[user].values())
+        current_error = sum(errors[:non_malicious_count])
+        all_error.append(current_error)
+    all_error = np.array(all_error)
+
+    for user in distances.keys():
+        median_users_grads = np.median(users_grads[user], axis=0)
+        iqr[user] = np.percentile(median_users_grads[user], 75) - np.percentile(median_users_grads[user], 25)
+    iqr = np.median(iqr)
+    med = np.median(median_users_grads, axis=0)
+
+    error_tolerance_parameter = np.median(all_error)
+
+    error_tolerance_distribution = iqr * 1.5
+
+    for user in distances.keys():
+        if np.median(users_grads[user]) < med - iqr or np.median(users_grads[user]) > med + iqr:
+            current_grads = np.delete(current_grads, user)
+        if np.percentile(median_users_grads[user], 75) - np.percentile(median_users_grads[user],25) > error_tolerance_distribution:
+            current_grads = np.delete(current_grads, user)
+        for parameter in distances[user].keys():
+            if parameter - median_users_grads[user] > error_tolerance_parameter or median_users_grads[user] - parameter < error_tolerance_parameter:
+                current_grads = np.delete(current_grads, user)
+    return current_grads
