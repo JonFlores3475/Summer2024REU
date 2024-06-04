@@ -5,15 +5,15 @@ import torch
 
 from Backbones import get_private_backbones
 from Sever.utils.sever_methods import SeverMethod
-from Sever.utils.utils import delphiflmedian
+from Sever.utils.utils import DelphiflMedian
 from utils.utils import row_into_parameters
 
 
-class TrimmedMeanSever(SeverMethod):
-    NAME = 'TrimmedMeanSever'
+class DelphiflMedianServer(SeverMethod):
+    NAME = 'DelphiflMedianServer'
 
     def __init__(self, args, cfg):
-        super(TrimmedMeanSever, self).__init__(args, cfg)
+        super(DelphiflMedianServer, self).__init__(args, cfg)
 
         nets_list = get_private_backbones(cfg)
 
@@ -53,7 +53,7 @@ class TrimmedMeanSever(SeverMethod):
         f = len(online_clients_list) // 2  # worse case 50% malicious points
         k = len(online_clients_list) - f - 1
 
-        current_grads = delphiflmedian(all_grads, len(online_clients_list), k)
+        current_grads = DelphiflMedian(all_grads, len(online_clients_list), k)
 
         self.velocity = self.momentum * self.velocity - self.learning_rate * current_grads
         self.current_weights += self.velocity

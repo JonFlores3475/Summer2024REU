@@ -1,5 +1,6 @@
 import torch
 from PIL import Image
+from torchvision import datasets
 from torchvision.datasets import MNIST
 import torchvision.transforms as transforms
 
@@ -7,10 +8,12 @@ from Datasets.federated_dataset.single_domain.utils.single_domain_dataset import
 
 from utils.conf import single_domain_data_path
 
+dataobj = datasets.MNIST
+
 
 class MyMNIST(torch.utils.data.Dataset):
     def __init__(self, root, train=True, transform=None,
-                 target_transform=None, download=False, data_name=None) -> None:
+                 target_transform=None, download=True, data_name=None) -> None:
         self.not_aug_transform = transforms.Compose([transforms.ToTensor()])
         self.data_name = data_name
         self.root = root
@@ -85,8 +88,8 @@ class FLMNIST(SingleDomainDataset):
             train_transform = self.one_channel_train_transform
 
         train_dataset = MyMNIST(root=single_domain_data_path(), train=True,
-                                download=False, transform=train_transform)
+                                download=True, transform=train_transform)
 
         test_dataset = MyMNIST(single_domain_data_path(), train=False,
-                               download=False, transform=self.one_channel_test_transform)
+                               download=True, transform=self.one_channel_test_transform)
         self.partition_label_skew_loaders(train_dataset, test_dataset)
