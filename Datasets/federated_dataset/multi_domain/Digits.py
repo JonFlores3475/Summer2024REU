@@ -35,7 +35,7 @@ class MyDigits(data.Dataset):
 
     def __build_truncated_dataset__(self):
         if self.data_name == 'MNIST':
-            dataobj = MNIST(self.root, self.train, self.transform, self.target_transform, self.download)
+            dataobj = MNIST('~/miniconda3/lib/python3.12/site-packages/torchvision/datasets/mnist', self.train, self.transform, self.target_transform, self.download)
 
         elif self.data_name == 'USPS':
             dataobj = USPS(self.root, self.train, self.transform, self.target_transform, self.download)
