@@ -24,7 +24,7 @@ class DelphiflMedianServer(SeverMethod):
             param = nets_list[0].state_dict()[name].view(-1)
             self.current_weights.append(param)
         self.current_weights = torch.cat(self.current_weights, dim=0).cpu().numpy()
-        self.velocity = np.zeros(self.current_weights.shape, self.current_weights.dtype)
+
         self.n = 5
 
     def sever_update(self, **kwargs):
@@ -55,8 +55,12 @@ class DelphiflMedianServer(SeverMethod):
 
         current_grads = DelphiflMedian(all_grads, len(online_clients_list), k)
 
+        self.velocity = torch.zeros(current_grads.shape[0], current_grads.shape[1])
+        self.current_weights = torch.tensor(self.current_weights)
+
         self.velocity = self.momentum * self.velocity - self.learning_rate * current_grads
-        self.current_weights += self.velocity
+
+        self.current_weights = torch.add(self.current_weights, self.velocity)
 
         row_into_parameters(self.current_weights, global_net.parameters())
         for _, net in enumerate(nets_list):

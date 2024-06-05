@@ -1,6 +1,7 @@
 from collections import defaultdict
 import sklearn.metrics.pairwise as smp
 import numpy as np
+import torch
 
 
 def trimmed_mean(users_grads, users_count, corrupted_count):
@@ -43,7 +44,7 @@ def _krum_create_distances(users_grads):
 def krum(users_grads, users_count, corrupted_count, distances=None, return_index=False):
     if not return_index:
         assert users_count >= 2 * corrupted_count + 1, (
-        'users_count>=2*corrupted_count + 3', users_count, corrupted_count)
+            'users_count>=2*corrupted_count + 3', users_count, corrupted_count)
     non_malicious_count = users_count - corrupted_count
     minimal_error = 1e20
     minimal_error_index = -1
@@ -201,10 +202,10 @@ def geometric_median_update(points, alphas, maxiter=4, eps=1e-5, verbose=False, 
 
 def DelphiflMedian(users_grads, users_count, corrupted_count):
     non_malicious_count = users_count - corrupted_count
-    median_users_grads = []
+    median_users_grads = np.empty(non_malicious_count)
     all_error = []
-    current_grads = users_grads.copy()
-    iqr = []
+    current_grads = torch.tensor(users_grads)
+    iqr = np.empty(non_malicious_count)
 
     distances = _krum_create_distances(users_grads)
     for user in distances.keys():
@@ -213,22 +214,23 @@ def DelphiflMedian(users_grads, users_count, corrupted_count):
         all_error.append(current_error)
     all_error = np.array(all_error)
 
-    for user in users_grads:
+    for user in range(non_malicious_count):
         median_users_grads[user] = np.median(users_grads[user], axis=0)
         iqr[user] = np.percentile(median_users_grads[user], 75) - np.percentile(median_users_grads[user], 25)
     iqr = np.median(iqr)
+    med = np.array(median_users_grads)
     med = np.median(median_users_grads, axis=0)
 
     error_tolerance_parameter = np.median(all_error)
 
     error_tolerance_distribution = iqr * 1.5
 
-    for user in distances.keys():
+    for user in range(non_malicious_count):
         if np.median(users_grads[user]) < med - iqr or np.median(users_grads[user]) > med + iqr:
-            current_grads = np.delete(current_grads, user)
+            current_grads[user,:] = torch.ones(current_grads.shape[1])
         if np.percentile(median_users_grads[user], 75) - np.percentile(median_users_grads[user],25) > error_tolerance_distribution:
-            current_grads = np.delete(current_grads, user)
+            current_grads[user,:] = torch.ones(current_grads.shape[1])
         for parameter in distances[user].keys():
             if parameter - median_users_grads[user] > error_tolerance_parameter or median_users_grads[user] - parameter < error_tolerance_parameter:
-                current_grads = np.delete(current_grads, user)
+                current_grads[user,:] = torch.ones(current_grads.shape[1])
     return current_grads

@@ -37,13 +37,13 @@ class MyDigits(data.Dataset):
         if self.data_name == 'MNIST':
             dataobj = MNIST('~/miniconda3/lib/python3.12/site-packages/torchvision/datasets/mnist', self.train, self.transform, self.target_transform, self.download)
 
-        elif self.data_name == 'USPS':
-            dataobj = USPS(self.root, self.train, self.transform, self.target_transform, self.download)
-        elif self.data_name == 'SVHN':
-            if self.train:
-                dataobj = SVHN(self.root, 'train', self.transform, self.target_transform, self.download)
-            else:
-                dataobj = SVHN(self.root, 'test', self.transform, self.target_transform, self.download)
+            #elif self.data_name == 'USPS':
+            dataobj = USPS('~/miniconda3/lib/python3.12/site-packages/torchvision/datasets/usps', self.train, self.transform, self.target_transform, self.download)
+        #elif self.data_name == 'SVHN':
+        #   if self.train:
+        #      dataobj = SVHN(self.root, 'train', self.transform, self.target_transform, self.download)
+        # else:
+        #    dataobj = SVHN(self.root, 'test', self.transform, self.target_transform, self.download)
         return dataobj
 
     def __getitem__(self, index: int) -> Tuple[type(Image), int]:
