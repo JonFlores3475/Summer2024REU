@@ -35,7 +35,7 @@ class MyMNIST(torch.utils.data.Dataset):
             self.data = self.data.numpy()
 
     def __build_truncated_dataset__(self):
-        dataobj = MNIST(self.root, self.train, self.transform, self.target_transform, self.download)
+        dataobj = MNIST('~/miniconda3/lib/python3.12/site-packages/torchvision/datasets/mnist', self.train, self.transform, self.target_transform, self.download)
 
         return dataobj
 
