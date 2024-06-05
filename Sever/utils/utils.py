@@ -213,7 +213,7 @@ def DelphiflMedian(users_grads, users_count, corrupted_count):
         all_error.append(current_error)
     all_error = np.array(all_error)
 
-    for user in distances.keys():
+    for user in users_grads:
         median_users_grads[user] = np.median(users_grads[user], axis=0)
         iqr[user] = np.percentile(median_users_grads[user], 75) - np.percentile(median_users_grads[user], 25)
     iqr = np.median(iqr)
