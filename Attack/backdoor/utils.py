@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 
 
 def base_backdoor(cfg, img, target, noise_data_rate):
-    if torch.rand(1) < noise_data_rate:
+    if torch.rand(1) < noise_data_rate: # Erin: Is this just a randomizer?
         target = cfg.attack.backdoor.backdoor_label
         for pos_index in range(0, len(cfg.attack.backdoor.trigger_position)):
             pos = cfg.attack.backdoor.trigger_position[pos_index]
@@ -15,13 +15,12 @@ def base_backdoor(cfg, img, target, noise_data_rate):
 
 
 def semantic_backdoor(cfg, img, target, noise_data_rate):
-    if torch.rand(1) < noise_data_rate:
+    if torch.rand(1) < noise_data_rate: # Erin: Is this just a randomizer?
         if target == cfg.attack.backdoor.semantic_backdoor_label:
             target = cfg.attack.backdoor.backdoor_label
 
             # img, _ = dataset.__getitem__(used_index)
             img = img + torch.randn(img.size()) * 0.05
-
     return img, target
 
 
@@ -40,9 +39,10 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
                     img, target = dataset.__getitem__(i)
                     if cfg.attack.backdoor.evils == 'base_backdoor':
                         img, target = base_backdoor(cfg, copy.deepcopy(img), copy.deepcopy(target), noise_data_rate)
-
-                    if cfg.attack.backdoor.evils == 'semantic_backdoor':
+                    elif cfg.attack.backdoor.evils == 'semantic_backdoor':
                         img, target = semantic_backdoor(cfg, copy.deepcopy(img), copy.deepcopy(target), noise_data_rate)
+                    else:
+                        print("ERROR: Choose between base backdoor and semantic backdoor")
 
                     all_targets.append(target)
                     all_imgs.append(img.numpy())
@@ -53,6 +53,12 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
                 if args.task == 'label_skew':
                     private_dataset.train_loaders[client_index] = DataLoader(new_dataset, batch_size=cfg.OPTIMIZER.local_train_batch,
                                                                              sampler=train_sampler, num_workers=4, drop_last=True)
+                else:
+                    # Is this necessary?
+                    print("--task is not equal to label_skew")
+            else:
+                # Is this necessary?
+                print("client_type[client_index] should be false")
 
     else:
 
@@ -74,11 +80,15 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
                         img, target = semantic_backdoor(cfg, copy.deepcopy(img), copy.deepcopy(target), noise_data_rate)
                         all_targets.append(target)
                         all_imgs.append(img.numpy())
+                else:
+                    print("ERROR: Choose between base backdoor and semantic backdoor")
 
                 # all_targets.append(target)
                 # all_imgs.append(img.numpy())
             new_dataset = BackdoorDataset(all_imgs, all_targets)
             private_dataset.backdoor_test_loader = DataLoader(new_dataset, batch_size=cfg.OPTIMIZER.local_train_batch, num_workers=4)
+        else:
+            print("ERROR: --task should be set to label_skew in order to run the backdoor attack without is_train")
 
 
 class BackdoorDataset(torch.utils.data.Dataset):
