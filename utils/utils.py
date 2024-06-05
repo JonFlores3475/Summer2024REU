@@ -90,7 +90,7 @@ def row_into_parameters(row, parameters):
     offset = 0
     for param in parameters:
         new_size = functools.reduce(lambda x, y: x * y, param.shape)
-        current_data = row[offset:offset + new_size]
+        current_data = row[:,offset:offset + new_size]
 
-        param.data[:] = torch.from_numpy(current_data.reshape(param.shape))
+        param.data[:] = torch.reshape(current_data[1], param.shape)
         offset += new_size
