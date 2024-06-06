@@ -14,7 +14,6 @@ from torch.utils.data import DataLoader
 # img - the image (model) being attacked
 # target - the type of target attack being used (think of labels)
 # noise_data_rate - the noise data rate of the CFG node
-# return - returns the new image (model) and target
 def base_backdoor(cfg, img, target, noise_data_rate):
     if torch.rand(1) < noise_data_rate: # Erin: Is this just a randomizer?
         target = cfg.attack.backdoor.backdoor_label
@@ -32,7 +31,6 @@ def base_backdoor(cfg, img, target, noise_data_rate):
 # img - the image (model) being attacked
 # target - the type of target attack being used (think of labels)
 # noise_data_rate - the noise data rate of the CFG node
-# return - returns the new image (model) and target
 def semantic_backdoor(cfg, img, target, noise_data_rate):
     if torch.rand(1) < noise_data_rate: # Erin: Is this just a randomizer?
         if target == cfg.attack.backdoor.semantic_backdoor_label:
@@ -92,6 +90,9 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
                 else:
                     # Is this necessary?
                     print("--task is not equal to label_skew")
+            else:
+                # Is this necessary?
+                print("client_type[client_index] should be false")
     # If it isn't in the training stage
     else:
         # Checks to see if the task is label_skew . . .
