@@ -78,6 +78,11 @@ def main(args=None):
         args = parse_args()
     
     # TODO: Check that none of the arguments conflict or would be invalid
+    #print(args.bad_client_rate)
+    #print(args.noise_data_rate)
+    #print(args.evils)
+    #print(args.backdoor_label)
+    #print(args.semantic_backdoor_label)
 
     args.conf_jobnum = str(uuid.uuid4())
     args.conf_timestamp = str(datetime.datetime.now())
