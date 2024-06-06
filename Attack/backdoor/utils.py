@@ -90,9 +90,6 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
                 else:
                     # Is this necessary?
                     print("--task is not equal to label_skew")
-            else:
-                # Is this necessary?
-                print("client_type[client_index] should be false")
     # If it isn't in the training stage
     else:
         # Checks to see if the task is label_skew . . .
