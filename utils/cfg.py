@@ -2,8 +2,13 @@ from yacs.config import CfgNode as CN
 from utils.utils import log_msg
 
 
-# simplify cfg
+# This function simplified the CfgNode and sets each part of the dump_cfg to simplify the passed in cfg
+#
+# args - parsed arguments from main
+# cfg - the CfgNode that we are simplifying
+# return - returns the simplified CfgNode
 def simplify_cfg(args, cfg):
+    # Gets the general information of the original CfgNode and applies it to the dump_cfg
     dump_cfg = CN()
     dump_cfg.DATASET = cfg.DATASET
     dump_cfg.OPTIMIZER = cfg.OPTIMIZER
@@ -22,15 +27,23 @@ def simplify_cfg(args, cfg):
         dump_cfg['Local'][cfg[args.method].local_method] = CN()
         dump_cfg['Local'][cfg[args.method].local_method] = cfg['Local'][cfg[args.method].local_method]
 
+    # Gets any information of the attack_type in the original CfgNode, if applicable
     if args.attack_type != 'None':
         dump_cfg['attack'] = CN()
         dump_cfg['attack'].bad_client_rate = cfg['attack'].bad_client_rate
         dump_cfg['attack'].noise_data_rate = cfg['attack'].noise_data_rate
+        #dump_cfg['attack'][args.backdoor.evils] = cfg['attack'].evils
+        #dump_cfg['attack'].backdoor.backdoor_label = cfg['attack'][args.backdoor_label]
+        #dump_cfg['attack'].backdoor.semantic_backdoor_label = cfg['attack'][args.semantic_backdoor_label]
         dump_cfg['attack'][args.attack_type] = cfg['attack'][args.attack_type]
-
+        
     return dump_cfg
 
-
+# Shows the information of a CfgNode
+#
+# args - the parsed arguments from main
+# cfg - the CfgNode
+# method - the method attached to the CfgNode that we are reporting
 def show_cfg(args, cfg, method):
     dump_cfg = CN()
     dump_cfg.DATASET = cfg.DATASET

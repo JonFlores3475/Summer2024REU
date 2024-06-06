@@ -39,6 +39,15 @@ def parse_args():
     parser.add_argument('--attack_type', type=str, default='None')
 
     '''
+    Extra Attack Flags
+    '''
+    parser.add_argument('--bad_client_rate', type=float, default=0.2, help='The ratio of bad clients')
+    parser.add_argument('--noise_data_rate', type=float, default=0.5, help='Rate of noise')
+    parser.add_argument('--evils', type=str, default='base_backdoor', help='Which type of backdoor attack: base_backdoor or semantic_backdoor')
+    parser.add_argument('--backdoor_label', type=int, default=2, help='Which label to change (int)')
+    parser.add_argument('--semantic_backdoor_label', type=int, default=3, help='Which label to change to (int)')
+
+    '''
     Federated Method: FedRC FedAVG FedR FedProx FedDyn FedOpt FedProc FedR FedProxRC  FedProxCos FedNTD
     '''
     parser.add_argument('--method', type=str, default='qffeAVG',
@@ -67,6 +76,13 @@ def parse_args():
 def main(args=None):
     if args is None:
         args = parse_args()
+    
+    # TODO: Check that none of the arguments conflict or would be invalid
+    #print(args.bad_client_rate)
+    #print(args.noise_data_rate)
+    #print(args.evils)
+    #print(args.backdoor_label)
+    #print(args.semantic_backdoor_label)
 
     args.conf_jobnum = str(uuid.uuid4())
     args.conf_timestamp = str(datetime.datetime.now())
