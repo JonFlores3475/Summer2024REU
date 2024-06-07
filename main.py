@@ -151,11 +151,12 @@ def main(args=None):
     '''
     Updating Additional Attack Flags
     '''
-    particial_cfg.attack.bad_client_rate = args.bad_client_rate
-    particial_cfg.attack.noise_data_rate = args.noise_data_rate
-    particial_cfg.attack.backdoor.evils = args.evils
-    particial_cfg.attack.backdoor.backdoor_label = args.backdoor_label
-    particial_cfg.attack.backdoor.semantic_backdoor_label = args.semantic_backdoor_label
+    if agrs.attack_type != 'None':
+        particial_cfg.attack.bad_client_rate = args.bad_client_rate
+        particial_cfg.attack.noise_data_rate = args.noise_data_rate
+        particial_cfg.attack.backdoor.evils = args.evils
+        particial_cfg.attack.backdoor.backdoor_label = args.backdoor_label
+        particial_cfg.attack.backdoor.semantic_backdoor_label = args.semantic_backdoor_label
 
     if args.attack_type == 'byzantine':
 
