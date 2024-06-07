@@ -151,7 +151,7 @@ def main(args=None):
     '''
     Updating Additional Attack Flags
     '''
-    if agrs.attack_type != 'None':
+    if args.attack_type != 'None':
         particial_cfg.attack.bad_client_rate = args.bad_client_rate
         particial_cfg.attack.noise_data_rate = args.noise_data_rate
         particial_cfg.attack.backdoor.evils = args.evils
