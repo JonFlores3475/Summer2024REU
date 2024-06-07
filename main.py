@@ -148,16 +148,6 @@ def main(args=None):
         client_domain_list = ini_client_domain(args.rand_domain_select, private_dataset.domain_list, particial_cfg.DATASET.parti_num)
         private_dataset.get_data_loaders(client_domain_list)
 
-    '''
-    Updating Additional Attack Flags
-    '''
-    if args.attack_type != 'None':
-        particial_cfg.attack.bad_client_rate = args.bad_client_rate
-        particial_cfg.attack.noise_data_rate = args.noise_data_rate
-        particial_cfg.attack.backdoor.evils = args.evils
-        particial_cfg.attack.backdoor.backdoor_label = args.backdoor_label
-        particial_cfg.attack.backdoor.semantic_backdoor_label = args.semantic_backdoor_label
-
     if args.attack_type == 'byzantine':
 
         if args.dataset in multi_domain_dataset_name:
@@ -173,6 +163,15 @@ def main(args=None):
         attack_dataset(args, particial_cfg, private_dataset, client_type)
 
     elif args.attack_type == 'backdoor':
+        '''
+        Updating Additional Attack Flags
+        '''
+        particial_cfg.attack.bad_client_rate = args.bad_client_rate
+        particial_cfg.attack.noise_data_rate = args.noise_data_rate
+        particial_cfg.attack.backdoor.evils = args.evils
+        particial_cfg.attack.backdoor.backdoor_label = args.backdoor_label
+        particial_cfg.attack.backdoor.semantic_backdoor_label = args.semantic_backdoor_label
+        
         bad_scale = int(particial_cfg.DATASET.parti_num * particial_cfg['attack'].bad_client_rate)
         good_scale = particial_cfg.DATASET.parti_num - bad_scale
         client_type = np.repeat(True, good_scale).tolist() + (np.repeat(False, bad_scale)).tolist()
