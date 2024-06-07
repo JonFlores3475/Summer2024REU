@@ -4,6 +4,15 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
+# Inverted Gradient Attack
+def inverted_gradient(args, cfg, client_type, private_dataset, is_train):
+    num_nodes = cfg.attack.bad_client_rate * cfg.DATASET.parti_num # N
+    dataset = copy.deepcopy(private_dataset.train_loaders[client_index].dataset) # y^ ??
+    img, target = dataset.__getitem__(0) # xi and yi
+    cfg.attack.noise_data_rate # alpha
+    weight = lambda_vector.cpu().np() # w
+
+
 # Base backdoor method is a more secure backdoor that is (potentially) used for more
 # stealth in a backdoor attack, but it isn't as detrimental.
 # This sets the target to the cfg's backdoor label, and then for every position in the
@@ -90,9 +99,6 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
                 else:
                     # Is this necessary?
                     print("--task is not equal to label_skew")
-            else:
-                # Is this necessary?
-                print("client_type[client_index] should be false")
     # If it isn't in the training stage
     else:
         # Checks to see if the task is label_skew . . .
