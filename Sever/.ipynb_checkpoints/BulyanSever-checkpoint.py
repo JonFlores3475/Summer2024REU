@@ -5,15 +5,15 @@ import torch
 
 from Backbones import get_private_backbones
 from Sever.utils.sever_methods import SeverMethod
-from Sever.utils.utils import DelphiflMedian
+from Sever.utils.utils import bulyan
 from utils.utils import row_into_parameters
 
 
-class DelphiflMedianSever(SeverMethod):
-    NAME = 'DelphiflMedianSever'
+class BulyanSever(SeverMethod):
+    NAME = 'BulyanSever'
 
     def __init__(self, args, cfg):
-        super(DelphiflMedianSever, self).__init__(args, cfg)
+        super(BulyanSever, self).__init__(args, cfg)
 
         nets_list = get_private_backbones(cfg)
 
@@ -53,7 +53,7 @@ class DelphiflMedianSever(SeverMethod):
         f = len(online_clients_list) // 2  # worse case 50% malicious points
         k = len(online_clients_list) - f - 1
 
-        current_grads = DelphiflMedian(all_grads, len(online_clients_list), f - k)
+        current_grads = bulyan(all_grads, len(online_clients_list), f - k)
 
         self.velocity = self.momentum * self.velocity - self.learning_rate * current_grads
         self.current_weights += self.velocity

@@ -274,7 +274,7 @@ CFG.FedAVG.local_method = 'BaseLocal'
 CFG.FedAVG.global_method = 'BaseSever'
 
 CFG.DelphiflMedian = CN()
-CFG.DelphiflMedian.local_method = 'FedProxLocal'
+CFG.DelphiflMedian.local_method = 'BaseLocal'
 CFG.DelphiflMedian.global_method = 'DelphiflMedianSever'
 
 # FedProx
