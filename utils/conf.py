@@ -5,7 +5,7 @@ import os
 
 
 def get_device(device_id) -> torch.device:
-    return torch.device("cuda"if torch.cuda.is_available() else "cpu")
+    return torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def multi_domain_data_path() -> str:
