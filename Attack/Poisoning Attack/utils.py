@@ -1,8 +1,16 @@
 import copy
 
 import numpy as np
+import keras
 import torch
 from torch.utils.data import DataLoader
+
+def inverse_loss(target, prediction):
+    loss = keras.categorical_crossentropy(target)
+    if loss < 0.001:
+        loss = 0.001
+    inv_loss = 1 / loss
+    return inv_loss
 
 # Inverted Gradient Attack
 def inverted_gradient(args, cfg, client_type, private_dataset, is_train):
