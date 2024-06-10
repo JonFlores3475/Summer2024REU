@@ -73,6 +73,29 @@ def krum(users_grads, users_count, corrupted_count, distances=None, return_index
         return minimal_error_index
     else:
         return users_grads[minimal_error_index]
+    
+
+def Delphi_krum(users_grads, users_count, corrupted_count, distances=None, return_index=False):
+    if not return_index:
+        assert users_count >= 2 * corrupted_count + 1, (
+            'users_count>=2*corrupted_count + 3', users_count, corrupted_count)
+    non_malicious_count = users_count - corrupted_count
+    minimal_error = 1e20
+    minimal_error_index = 0
+
+    if distances is None:
+        distances = _krum_create_distances(users_grads)
+    for user in distances.keys():
+        errors = sorted(distances[user].values())
+        current_error = sum(errors[:non_malicious_count])
+        if current_error < minimal_error:
+            minimal_error = current_error
+            minimal_error_index = user
+
+    if return_index:
+        return minimal_error_index
+    else:
+        return users_grads[minimal_error_index]
 
 
 def multi_krum(users_grads, users_count, corrupted_count, n):
@@ -238,7 +261,7 @@ def DelphiflMedian(users_grads, users_count, corrupted_count, n):
 
     distances = _krum_create_distances(users_grads)
     while len(selection_set) < set_size:
-        currently_selected = krum(users_grads, users_count - len(selection_set), corrupted_count, distances, True)
+        currently_selected = Delphi_krum(users_grads, users_count - len(selection_set), corrupted_count, distances, True)
         selection_set.append(users_grads[currently_selected])
 
         # remove the selected from next iterations:
