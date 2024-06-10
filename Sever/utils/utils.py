@@ -120,8 +120,8 @@ def multi_krum(users_grads, users_count, corrupted_count, n):
 
 def multi_krum_median(users_grads, users_count, corrupted_count, n):
     non_malicious_count = users_count - corrupted_count
-    # minimal_error = 1e20
-    # minimal_error_index = -1
+    minimal_error = 1e20
+    minimal_error_index = -1
     all_error = []
 
     distances = _krum_create_distances(users_grads)
@@ -129,9 +129,9 @@ def multi_krum_median(users_grads, users_count, corrupted_count, n):
         errors = sorted(distances[user].values())
         current_error = sum(errors[:non_malicious_count])
         all_error.append(current_error)
-        # if current_error < minimal_error:
-        #     minimal_error = current_error
-        #     minimal_error_index = user
+        if current_error < minimal_error:
+            minimal_error = current_error
+            minimal_error_index = user
     all_error = np.array(all_error)
     sort_index = all_error.argsort()
 
