@@ -9,11 +9,11 @@ from Sever.utils.utils import bulyan
 from utils.utils import row_into_parameters
 
 
-class DelphiflMedianServer(SeverMethod):
-    NAME = 'DelphiflMedianServer'
+class DelphiflMedianSever(SeverMethod):
+    NAME = 'DelphiflMedianSever'
 
     def __init__(self, args, cfg):
-        super(DelphiflMedianServer, self).__init__(args, cfg)
+        super(DelphiflMedianSever, self).__init__(args, cfg)
 
         nets_list = get_private_backbones(cfg)
 
