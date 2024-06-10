@@ -261,7 +261,7 @@ def DelphiflMedian(users_grads, users_count, corrupted_count, n):
 
     distances = _krum_create_distances(users_grads)
     while len(selection_set) < set_size:
-        currently_selected = delphi_krum(users_grads, users_count - len(selection_set), corrupted_count, distances, True)
+        currently_selected = Delphi_krum(users_grads, users_count - len(selection_set), corrupted_count, distances, True)
         selection_set.append(users_grads[currently_selected])
 
         # remove the selected from next iterations:
