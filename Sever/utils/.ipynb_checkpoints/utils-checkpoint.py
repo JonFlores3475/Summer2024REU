@@ -95,6 +95,26 @@ def multi_krum(users_grads, users_count, corrupted_count, n):
     mean_users_grads = np.mean(users_grads[sort_index[:n]], axis=0)
     return mean_users_grads
 
+def multi_krum_median(users_grads, users_count, corrupted_count, n):
+    non_malicious_count = users_count - corrupted_count
+    # minimal_error = 1e20
+    # minimal_error_index = -1
+    all_error = []
+
+    distances = _krum_create_distances(users_grads)
+    for user in distances.keys():
+        errors = sorted(distances[user].values())
+        current_error = sum(errors[:non_malicious_count])
+        all_error.append(current_error)
+        # if current_error < minimal_error:
+        #     minimal_error = current_error
+        #     minimal_error_index = user
+    all_error = np.array(all_error)
+    sort_index = all_error.argsort()
+
+    mean_users_grads = np.median(users_grads[sort_index[:n]], axis=0)
+    return mean_users_grads
+
 
 def fools_gold(this_delta, summed_deltas, sig_features_idx, model, topk_prop=0, importance=False, importanceHard=False,
                clip=0):
@@ -211,7 +231,7 @@ def geometric_median_update(points, alphas, maxiter=4, eps=1e-5, verbose=False, 
     return median, num_oracle_calls, logs
 
 
-def DelphiflMedian(users_grads, users_count, corrupted_count):
+def DelphiflMedian(users_grads, users_count, corrupted_count, n):
     assert users_count >= 4 * corrupted_count + 3
     set_size = users_count - 2 * corrupted_count
     selection_set = []
@@ -226,4 +246,4 @@ def DelphiflMedian(users_grads, users_count, corrupted_count):
         for remaining_user in distances.keys():
             distances[remaining_user].pop(currently_selected)
 
-    return trimmed_median(np.array(selection_set), len(selection_set), 2 * corrupted_count)
+    return multi_krum_median(np.array(selection_set), len(selection_set), 2 * corrupted_count, n)
