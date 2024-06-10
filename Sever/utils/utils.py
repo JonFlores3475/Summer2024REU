@@ -15,6 +15,17 @@ def trimmed_mean(users_grads, users_count, corrupted_count):
     return current_grads
 
 
+def trimmed_median(users_grads, users_count, corrupted_count):
+    number_to_consider = int(users_grads.shape[0] - corrupted_count) - 1
+    current_grads = np.empty((users_grads.shape[1],), users_grads.dtype)
+
+    for i, param_across_users in enumerate(users_grads.T):
+        med = np.median(param_across_users)
+        good_vals = sorted(param_across_users - med, key=lambda x: abs(x))[:number_to_consider]
+        current_grads[i] = np.median(good_vals) + med
+    return current_grads
+
+
 def bulyan(users_grads, users_count, corrupted_count):
     assert users_count >= 4 * corrupted_count + 3
     set_size = users_count - 2 * corrupted_count
@@ -201,36 +212,18 @@ def geometric_median_update(points, alphas, maxiter=4, eps=1e-5, verbose=False, 
 
 
 def DelphiflMedian(users_grads, users_count, corrupted_count):
-    non_malicious_count = users_count - corrupted_count
-    median_users_grads = np.empty(non_malicious_count)
-    all_error = []
-    current_grads = torch.tensor(users_grads)
-    iqr = np.empty(non_malicious_count)
+    assert users_count >= 4 * corrupted_count + 3
+    set_size = users_count - 2 * corrupted_count
+    selection_set = []
 
     distances = _krum_create_distances(users_grads)
-    for user in distances.keys():
-        errors = sorted(distances[user].values())
-        current_error = sum(errors[:non_malicious_count])
-        all_error.append(current_error)
-    all_error = np.array(all_error)
+    while len(selection_set) < set_size:
+        currently_selected = krum(users_grads, users_count - len(selection_set), corrupted_count, distances, True)
+        selection_set.append(users_grads[currently_selected])
 
-    for user in range(non_malicious_count):
-        median_users_grads[user] = np.median(users_grads[user], axis=0)
-        iqr[user] = np.percentile(median_users_grads[user], 75) - np.percentile(median_users_grads[user], 25)
-    iqr = np.median(iqr)
-    med = np.array(median_users_grads)
-    med = np.median(median_users_grads, axis=0)
+        # remove the selected from next iterations:
+        distances.pop(currently_selected)
+        for remaining_user in distances.keys():
+            distances[remaining_user].pop(currently_selected)
 
-    error_tolerance_parameter = np.median(all_error)
-
-    error_tolerance_distribution = iqr * 1.5
-
-    for user in range(non_malicious_count):
-        if np.median(users_grads[user]) < med - iqr or np.median(users_grads[user]) > med + iqr:
-            current_grads[user,:] = torch.ones(current_grads.shape[1])
-        if np.percentile(median_users_grads[user], 75) - np.percentile(median_users_grads[user],25) > error_tolerance_distribution:
-            current_grads[user,:] = torch.ones(current_grads.shape[1])
-        for parameter in distances[user].keys():
-            if parameter - median_users_grads[user] > error_tolerance_parameter or median_users_grads[user] - parameter < error_tolerance_parameter:
-                current_grads[user,:] = torch.ones(current_grads.shape[1])
-    return current_grads
+    return trimmed_median(np.array(selection_set), len(selection_set), 2 * corrupted_count)
