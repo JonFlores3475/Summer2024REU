@@ -3,8 +3,8 @@ import inspect
 import os
 
 def get_all_models():
-    return [model.strip('.py') for model in os.listdir('Methods')
-           if not model.find('_') > -1 and 'py' in model]
+    return [model.split('.')[0] for model in os.listdir('Methods')
+            if not model.find('__') > -1 and 'py' in model]
 
 Fed_Methods_NAMES = {}
 for model in get_all_models():
