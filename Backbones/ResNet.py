@@ -1,10 +1,14 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import torch # https://pytorch.org/docs/stable/torch.html
+import torch.nn as nn # https://pytorch.org/docs/stable/nn.html
+import torch.nn.functional as F # https://pytorch.org/docs/stable/nn.functional.html
+
+# relu: https://pytorch.org/docs/stable/generated/torch.nn.functional.relu.html#torch.nn.functional.relu
+# avg_pool2d: https://pytorch.org/docs/stable/generated/torch.nn.functional.avg_pool2d.html#torch.nn.functional.avg_pool2d
 from torch.nn.functional import relu, avg_pool2d
 from typing import List
-import torch.utils.model_zoo as model_zoo
-import torchvision.models.resnet
+
+import torch.utils.model_zoo as model_zoo # https://pytorch.org/docs/stable/model_zoo.html
+import torchvision.models.resnet # https://pytorch.org/vision/stable/models/resnet.html
 
 model_urls = {
     'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
@@ -13,7 +17,6 @@ model_urls = {
     'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
     'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth'
 }
-
 
 def conv3x3(in_planes: int, out_planes: int, stride: int = 1) -> F.conv2d:
     """
@@ -46,11 +49,13 @@ class BasicBlock(nn.Module):
         """
         super(BasicBlock, self).__init__()
         self.conv1 = conv3x3(in_planes, planes, stride)
-        self.bn1 = nn.BatchNorm2d(planes)
+        self.bn1 = nn.BatchNorm2d(planes) # Applies Batch Normalization over a 4D input.
         self.conv2 = conv3x3(planes, planes)
         self.bn2 = nn.BatchNorm2d(planes)
 
-        self.shortcut = nn.Sequential()
+        self.shortcut = nn.Sequential() # A sequential container
+        # torch.nn.Sequential(*args: Module)
+        # https://pytorch.org/docs/stable/generated/torch.nn.Sequential.html#torch.nn.Sequential
         if stride != 1 or in_planes != self.expansion * planes:
             self.shortcut = nn.Sequential(
                 nn.Conv2d(in_planes, self.expansion * planes, kernel_size=1,
@@ -65,6 +70,8 @@ class BasicBlock(nn.Module):
         :return: output tensor (10)
         """
         out = relu(self.bn1(self.conv1(x)))
+        # relu: applies the rectified linear unit function element-wise.
+        # returns a tensor
         out = self.bn2(self.conv2(out))
         out += self.shortcut(x)
         out = relu(out)
@@ -79,6 +86,8 @@ class Bottleneck(nn.Module):
         self.conv1 = conv1x1(input_channel, channel)
         self.bn1 = nn.BatchNorm2d(channel)
         self.relu = nn.ReLU(inplace=False)
+        # Applies the rectified linear unit function element-wise.
+        # inplace by default is False. (can optionally do the operation in-place)
         self.conv2 = conv3x3(channel, channel, stride=stride)
         self.bn2 = nn.BatchNorm2d(channel)
         self.conv3 = conv1x1(channel, channel * self.expansion)
