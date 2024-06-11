@@ -19,6 +19,11 @@ import uuid
 import copy
 import os
 
+# General Notes:
+# When the attack is a backdoor attack, it creates a partial_cfg variable, updating its information, and including it
+# into the function call. This initially made me through that the "CfgNode" is the "local model". However, it is also
+# used in the train method, which is only called once rather than multiple times. So CfgNode isn't the local model? Idk
+# overall I'm still a little confused about it.
 
 def parse_args():
     parser = ArgumentParser(description='Federated Learning', allow_abbrev=False)
