@@ -15,16 +15,6 @@ def trimmed_mean(users_grads, users_count, corrupted_count):
     return current_grads
 
 
-def trimmed_median(users_grads, users_count, corrupted_count):
-    number_to_consider = int(users_grads.shape[0] - corrupted_count) - 1
-    current_grads = np.empty((users_grads.shape[1],), users_grads.dtype)
-
-    for i, param_across_users in enumerate(users_grads.T):
-        med = np.median(param_across_users)
-        good_vals = sorted(param_across_users - med, key=lambda x: abs(x))[:number_to_consider]
-        current_grads[i] = np.median(good_vals) + med
-    return current_grads
-
 
 def bulyan(users_grads, users_count, corrupted_count):
     assert users_count >= 4 * corrupted_count + 3
@@ -74,29 +64,7 @@ def krum(users_grads, users_count, corrupted_count, distances=None, return_index
     else:
         return users_grads[minimal_error_index]
     
-
-def Delphi_krum(users_grads, users_count, corrupted_count, distances=None, return_index=False):
-    if not return_index:
-        assert users_count >= 2 * corrupted_count + 1, (
-            'users_count>=2*corrupted_count + 3', users_count, corrupted_count)
-    non_malicious_count = users_count - corrupted_count
-    minimal_error = 1e20
-    minimal_error_index = 0
-
-    if distances is None:
-        distances = _krum_create_distances(users_grads)
-    for user in distances.keys():
-        errors = sorted(distances[user].values())
-        current_error = sum(errors[:non_malicious_count])
-        if current_error < minimal_error:
-            minimal_error = current_error
-            minimal_error_index = user
-
-    if return_index:
-        return minimal_error_index
-    else:
-        return users_grads[minimal_error_index]
-
+    
 
 def multi_krum(users_grads, users_count, corrupted_count, n):
     non_malicious_count = users_count - corrupted_count
@@ -260,13 +228,15 @@ def DelphiflMedian(users_grads, users_count, corrupted_count, n):
     selection_set = []
 
     distances = _krum_create_distances(users_grads)
-    while len(selection_set) < set_size:
-        currently_selected = Delphi_krum(users_grads, users_count - len(selection_set), corrupted_count, distances, True)
-        selection_set.append(users_grads[currently_selected])
+    med = multi_krum_median(users_grads, users_count - len(selection_set), corrupted_count, n)
+    for user in med:
+        while len(selection_set) < set_size:
+            currently_selected = krum(user, users_count - len(selection_set), corrupted_count, distances, True)
+            selection_set.append(users_grads[currently_selected])
 
         # remove the selected from next iterations:
-        distances.pop(currently_selected)
-        for remaining_user in distances.keys():
-            distances[remaining_user].pop(currently_selected)
+            distances.pop(currently_selected)
+            for remaining_user in distances.keys():
+                distances[remaining_user].pop(currently_selected)
 
-    return multi_krum_median(np.array(selection_set), len(selection_set), 2 * corrupted_count, n)
+    return trimmed_mean(np.array(selection_set), len(selection_set), 2 * corrupted_count)

@@ -133,6 +133,13 @@ CFG.Sever.FLTrustSever.pub_aug = 'weak'
 CFG.Sever.FLTrustSever.public_batch_size = 64
 CFG.Sever.FLTrustSever.public_epoch = 20
 
+CFG.Sever.DelphiflMedianSever = CN()
+CFG.Sever.DelphiflMedianSever.public_dataset_name = 'pub_minst'
+CFG.Sever.DelphiflMedianSever.pub_len = 5000
+CFG.Sever.DelphiflMedianSever.pub_aug = 'weak'
+CFG.Sever.DelphiflMedianSever.public_batch_size = 64
+CFG.Sever.DelphiflMedianSever.public_epoch = 20
+
 CFG.Sever.SageFlowSever = CN()
 CFG.Sever.SageFlowSever.public_dataset_name = 'pub_minst'
 CFG.Sever.SageFlowSever.pub_len = 5000
