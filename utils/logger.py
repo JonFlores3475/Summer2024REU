@@ -7,9 +7,14 @@ from utils.utils import create_if_not_exists
 import yaml
 from yacs.config import CfgNode as CN
 
+# Arguments that are not used in this code and are removed for simplicity's sake later
 except_args = ['csv_log', 'csv_name', 'device_id', 'seed', 'tensorboard', 'conf_jobnum', 'conf_timestamp', 'conf_host', 'opts']
 
 
+# Class used to write the log for the simulation
+#
+# args - the arguments passed in through main
+# cfg - the CFG node being passed in
 class CsvWriter:
     def __init__(self, args, cfg):
         self.args = args
@@ -18,6 +23,7 @@ class CsvWriter:
         self.para_path = self.write_para()
         print(self.para_path)
 
+    # Making an OS path to get to the model
     def model_folder_path(self):
         if self.args.task == 'OOD':
             model_path = os.path.join(log_path(), self.args.task, self.args.attack_type, self.args.dataset, self.cfg.OOD.out_domain, self.args.averaging,
@@ -31,6 +37,11 @@ class CsvWriter:
         create_if_not_exists(model_path)
         return model_path
 
+    # Used in training.py to write the weights in the different epochs
+    #
+    # weight_dict - dictionary of the weights, gets written to the write file
+    # epoch_index = used to know what and how to write
+    # client_domain_list - list, gets written to the write file
     def write_weight(self, weight_dict, epoch_index, client_domain_list):
         weight_path = os.path.join(self.para_path, 'weight.csv')
         if epoch_index != 0:
@@ -46,6 +57,7 @@ class CsvWriter:
             for k in weight_dict:
                 result_file.write(k + ':' + str(list(weight_dict[k])) + '\n')
 
+    # Makes an account path, either ALL or MEAN
     def write_acc(self, acc, name, mode='ALL'):
         if mode == 'ALL':
             acc_path = os.path.join(self.para_path, name + '_all_acc.csv')
@@ -54,6 +66,7 @@ class CsvWriter:
             mean_acc_path = os.path.join(self.para_path, name + '_mean_acc.csv')
             self.write_mean_acc(mean_acc_path, acc)
 
+    # Adds cfg to a dictionary and returns it
     def cfg_to_dict(self, cfg):
         d = {}
         for k, v in cfg.items():
@@ -63,6 +76,7 @@ class CsvWriter:
                 d[k] = v
         return d
 
+    # Adds a dictionary to the cfg and returns it
     def dict_to_cfg(self, d):
         cfg = CN()
         for k, v in d.items():
@@ -72,6 +86,7 @@ class CsvWriter:
                 cfg[k] = v
         return cfg
 
+    # Write the parameters of the model to the log
     def write_para(self) -> None:
         from yacs.config import CfgNode as CN
 
@@ -79,6 +94,7 @@ class CsvWriter:
         args = vars(args)
         cfg = copy.deepcopy(self.cfg)
 
+        # Remove the excepted args from the list of arguments
         for cc in except_args:
             if cc in args: del args[cc]
         for key, value in args.items():
@@ -87,6 +103,9 @@ class CsvWriter:
         n_para = len(paragroup_dirs)
         final_check = False
 
+        # If a specific name is included in the args, use it in the path
+        # Otherwise, make a seperate path not including a name
+        # Return the resulting path
         if self.args.csv_name is not None:
 
             path = os.path.join(self.model_path, self.args.csv_name)
@@ -156,6 +175,10 @@ class CsvWriter:
                 path = para_path
         return path
 
+    # Write the mean results of the accounts
+    #
+    # mean_path - path to the mean value
+    # acc_list - list of accounts
     def write_mean_acc(self, mean_path, acc_list):
         if os.path.exists(mean_path):
             with open(mean_path, 'a') as result_file:
@@ -182,6 +205,10 @@ class CsvWriter:
                     else:
                         result_file.write('\n')
 
+    # Write all results of all accounts
+    #
+    # all_path = all paths
+    # al_acc_list - list of all accounts
     def write_all_acc(self, all_path, all_acc_list):
         if os.path.exists(all_path):
             with open(all_path, 'a') as result_file:
