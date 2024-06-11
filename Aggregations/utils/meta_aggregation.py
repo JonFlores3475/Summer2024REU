@@ -15,13 +15,24 @@ class FederatedAggregation:
     def weight_calculate(self, **kwargs):
         pass
 
+    # Aggregates all the parts of the model
+    #
+    # kwargs - required: freq, online_clients_list, nets_list, global_net, except_part, global_only
+    #        - optional: global_w, use_additional_net, additional_net_list, additional_freq
     def agg_parts(self, **kwargs):
+        # How many times a parameter is a value
         freq = kwargs['freq']
+        # Simulated, random
         online_clients_list = kwargs['online_clients_list']
+        # Potentially randomized NN
         nets_list = kwargs['nets_list']
+        # Global version of the nets_list
         global_net = kwargs['global_net']
+        # Dictionary holding the global weights
         global_w = {}
+        # List
         except_part = kwargs['except_part']
+        # Whether it is loaded only to global_net or also to net
         global_only = kwargs['global_only']
 
         use_additional_net = False
@@ -37,6 +48,7 @@ class FederatedAggregation:
             net = nets_list[net_id]
             net_para = net.state_dict()
 
+            # Node used to track parameters
             used_net_para = {}
             for k, v in net_para.items():
                 is_in = False
