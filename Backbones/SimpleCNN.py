@@ -1,7 +1,7 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torch import distributions
+import torch # https://pytorch.org/docs/stable/torch.html
+import torch.nn as nn # https://pytorch.org/docs/stable/nn.html
+import torch.nn.functional as F # https://pytorch.org/docs/stable/nn.functional.html
+from torch import distributions # https://pytorch.org/docs/stable/distributions.html
 
 
 class SimpleCNN_header(nn.Module):
@@ -113,8 +113,12 @@ class SimpleCNN_sr(nn.Module):
         z_mu = z_params[:, :self.cls.in_features]
         z_sigma = F.softplus(z_params[:, self.cls.in_features:])
         z_dist = distributions.Independent(distributions.normal.Normal(z_mu, z_sigma), 1)
-        z = z_dist.rsample([num_samples]).view([-1, self.cls.in_features])
+        # torch.distributions.independent.Independent(base_distribution, reinterpreted_batch_ndims, validate_args=None)
+        # Independent: reinterprets some of the batch dims of a distribution as event dims.
 
+        z = z_dist.rsample([num_samples]).view([-1, self.cls.in_features])
+        # rsample(sample_shape=torch.Size([]))
+        
         if return_dist:
             return z, (z_mu, z_sigma)
         else:
@@ -128,7 +132,22 @@ class SimpleCNN_sr(nn.Module):
         else:
             x = self.featurize(x, num_samples=self.num_samples, return_dist=False)
             preds = torch.softmax(self.cls(x), dim=1)
+            '''
+            # torch.softmax(input, dim, *, dtype=None) → Tensor
+            # https://pytorch.org/docs/stable/generated/torch.nn.functional.softmax.html#torch.nn.functional.softmax
+            # softmax function ^
+            # It is applied to all slices along dim, and will re-scale 
+            them so that the elements lie in the range [0, 1] and sum to 1.
+            # Note: This function doesn’t work directly with NLLLoss, 
+            which expects the Log to be computed between the Softmax 
+            and itself. Use log_softmax instead (it’s faster and has 
+            better numerical properties).
+            '''
+
             preds = preds.view([self.num_samples, -1, self.cls.out_features]).mean(0)
+            # preds: are these the predecessors?
             y = torch.log(preds)
+            # https://pytorch.org/docs/stable/generated/torch.log.html#torch.log
+            # Returns a new tensor with the natural logarithm of the elements of input.
 
         return y

@@ -1,12 +1,16 @@
-from torch.autograd import Variable
-import torch.nn as nn
-import torch.nn.functional as F
-import math
-import torch.utils.model_zoo as model_zoo
-import torch
-import random
-import numpy as np
-import numpy.random as npr
+# autograd: https://pytorch.org/docs/stable/autograd.html
+# ^ automatic differentiation package
+# Variable: is currently deprecated
+# Autograd automatically supports Tensors with requires_grad set to True
+# from torch.autograd import Variable
+import torch.nn as nn # https://pytorch.org/docs/stable/nn.html
+import torch.nn.functional as F # https://pytorch.org/docs/stable/nn.functional.html
+import math # https://docs.python.org/3/library/math.html
+import torch.utils.model_zoo as model_zoo # https://pytorch.org/docs/stable/model_zoo.html
+import torch # https://pytorch.org/docs/stable/torch.html
+import random # https://www.w3schools.com/python/module_random.asp
+import numpy as np # https://numpy.org/doc/stable/reference/#
+import numpy.random as npr # https://numpy.org/doc/stable/reference/random/index.html#module-numpy.random
 
 __all__ = ['ResNet', 'resnet50', 'resnet18', 'resnet34', 'resnet101', 'resnet152']
 model_urls = {
@@ -19,7 +23,7 @@ model_urls = {
 
 
 def conv1x1(input_channel, output_channel, bias=False):
-    return nn.Conv2d(input_channel, output_channel, kernel_size=1, bias=bias)
+    return nn.Conv2d(input_channel, output_cFhannel, kernel_size=1, bias=bias)
 
 
 def conv3x3(in_channel, out_channel, stride=1, padding=1, bias=False):
