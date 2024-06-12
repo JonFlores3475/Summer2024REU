@@ -20,6 +20,16 @@ print("Derivative of expression with respect to x : {}".format(expr_diff))
 print("Value of the derivative : {}".format(expr_diff.doit()))
 # --------------------------------
 
+# --------------------------------
+# Sneaky randomness (attempt at hiding in Gaussian noise) (generally messing things up)
+# Found out that img may be the weights and not the image itself
+# This is a very basic version of this and will likely need to be modified
+def sneaky_random(img, noise_data_rate):
+    if torch.rand(1) < noise_data_rate:
+        img = img + torch.randn(img.size()) * 0.47
+    return img
+# --------------------------------
+
 def inverse_loss(target, prediction):
     loss = keras.categorical_crossentropy(target)
     if loss < 0.001:
