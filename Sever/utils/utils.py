@@ -17,7 +17,8 @@ def trimmed_mean(users_grads, users_count, corrupted_count):
         current_grads[i] = np.mean(good_vals) + med
     
     tock = process_time()
-    print('\trimmed mean time:' + tock-tick)
+    print('\ntrimmed mean time: ')
+    print(tock-tick)
     return current_grads
 
 
@@ -49,7 +50,8 @@ def _krum_create_distances(users_grads):
             distances[i][j] = distances[j][i] = np.linalg.norm(users_grads[i] - users_grads[j])
     
     tock = process_time()
-    print('\Krum distances time:' + tock-tick)
+    print('\nKrum distances time: ')
+    print(tock-tick)
     return distances
 
 
@@ -74,7 +76,8 @@ def krum(users_grads, users_count, corrupted_count, distances=None, return_index
             
     tock = process_time()
             
-    print('\Krum time:' + tock-tick)
+    print('\nKrum time: ')
+    print(tock-tick)
 
     if return_index:
         return minimal_error_index
@@ -125,7 +128,8 @@ def multi_krum_median(users_grads, users_count, corrupted_count, n):
     tock = process_time()
 
     mean_users_grads = np.median(users_grads[sort_index[:n]], axis=0)
-    print('\Multi-Krum time:' + tock-tick)
+    print('\nMulti-Krum time: ')
+    print(tock-tick)
     return mean_users_grads
 
 
@@ -265,6 +269,7 @@ def DelphiflMedian(users_grads, users_count, corrupted_count, n):
     
     tock = process_time()
     
-    print('\Delphi Median overall time:' + tock - tick)
+    print('\nDelphi Median overall time: ')
+    print(tock-tick)
 
     return trimmed_mean(np.array(selection_set), len(selection_set), 2 * corrupted_count)

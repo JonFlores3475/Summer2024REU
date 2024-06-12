@@ -292,8 +292,8 @@ CFG.DelphiflMedian.local_method = 'BaseLocal'
 CFG.DelphiflMedian.global_method = 'DelphiflMedianSever'
 
 CFG.DelphiflZeroTrust = CN()
-CFG.DelphiflMedian.local_method = 'BaseLocal'
-CFG.DelphiflMedian.global_method = 'DelphiflZeroTrustSever'
+CFG.DelphiflZeroTrust.local_method = 'BaseLocal'
+CFG.DelphiflZeroTrust.global_method = 'DelphiflZeroTrustSever'
 
 # FedProx
 CFG.FedProx = CN()
