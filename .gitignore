@@ -3,5 +3,4 @@
 *.iml
 analysis.py
 mnist.sh
-data
 opt.sh
