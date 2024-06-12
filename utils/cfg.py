@@ -140,6 +140,13 @@ CFG.Sever.DelphiflMedianSever.pub_aug = 'weak'
 CFG.Sever.DelphiflMedianSever.public_batch_size = 64
 CFG.Sever.DelphiflMedianSever.public_epoch = 20
 
+CFG.Sever.DelphiflZeroTrustSever = CN()
+CFG.Sever.DelphiflZeroTrustSever.public_dataset_name = 'pub_minst'
+CFG.Sever.DelphiflZeroTrustSever.pub_len = 5000
+CFG.Sever.DelphiflZeroTrustSever.pub_aug = 'weak'
+CFG.Sever.DelphiflZeroTrustSever.public_batch_size = 64
+CFG.Sever.DelphiflZeroTrustSever.public_epoch = 20
+
 CFG.Sever.SageFlowSever = CN()
 CFG.Sever.SageFlowSever.public_dataset_name = 'pub_minst'
 CFG.Sever.SageFlowSever.pub_len = 5000
@@ -283,6 +290,10 @@ CFG.FedAVG.global_method = 'BaseSever'
 CFG.DelphiflMedian = CN()
 CFG.DelphiflMedian.local_method = 'BaseLocal'
 CFG.DelphiflMedian.global_method = 'DelphiflMedianSever'
+
+CFG.DelphiflZeroTrust = CN()
+CFG.DelphiflMedian.local_method = 'BaseLocal'
+CFG.DelphiflMedian.global_method = 'DelphiflZeroTrustSever'
 
 # FedProx
 CFG.FedProx = CN()
