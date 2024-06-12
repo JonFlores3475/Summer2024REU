@@ -48,7 +48,7 @@ class DelphiflZeroTrustSever(SeverMethod):
         temp_net = copy.deepcopy(global_net)
 
         with torch.no_grad():
-               all_delta = []
+            all_delta = []
             global_net_para = []
             add_global = True
             for i in online_clients_list:

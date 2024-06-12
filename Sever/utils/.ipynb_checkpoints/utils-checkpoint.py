@@ -2,9 +2,12 @@ from collections import defaultdict
 import sklearn.metrics.pairwise as smp
 import numpy as np
 import torch
+from time import process_time
 
 
 def trimmed_mean(users_grads, users_count, corrupted_count):
+    tick = process_time()
+    
     number_to_consider = int(users_grads.shape[0] - corrupted_count) - 1
     current_grads = np.empty((users_grads.shape[1],), users_grads.dtype)
 
@@ -12,6 +15,9 @@ def trimmed_mean(users_grads, users_count, corrupted_count):
         med = np.median(param_across_users)
         good_vals = sorted(param_across_users - med, key=lambda x: abs(x))[:number_to_consider]
         current_grads[i] = np.mean(good_vals) + med
+    
+    tock = process_time()
+    print('\trimmed mean time:' + tock-tick)
     return current_grads
 
 
@@ -35,14 +41,21 @@ def bulyan(users_grads, users_count, corrupted_count):
 
 
 def _krum_create_distances(users_grads):
+    tick = process_time()
+    
     distances = defaultdict(dict)
     for i in range(len(users_grads)):
         for j in range(i):
             distances[i][j] = distances[j][i] = np.linalg.norm(users_grads[i] - users_grads[j])
+    
+    tock = process_time()
+    print('\Krum distances time:' + tock-tick)
     return distances
 
 
 def krum(users_grads, users_count, corrupted_count, distances=None, return_index=False):
+    tick = process_time()
+    
     if not return_index:
         assert users_count >= 2 * corrupted_count + 1, (
             'users_count>=2*corrupted_count + 3', users_count, corrupted_count)
@@ -58,6 +71,10 @@ def krum(users_grads, users_count, corrupted_count, distances=None, return_index
         if current_error < minimal_error:
             minimal_error = current_error
             minimal_error_index = user
+            
+    tock = process_time()
+            
+    print('\Krum time:' + tock-tick)
 
     if return_index:
         return minimal_error_index
@@ -87,6 +104,8 @@ def multi_krum(users_grads, users_count, corrupted_count, n):
     return mean_users_grads
 
 def multi_krum_median(users_grads, users_count, corrupted_count, n):
+    tick = process_time()
+    
     non_malicious_count = users_count - corrupted_count
     #minimal_error = 1e20
     #minimal_error_index = -1
@@ -102,8 +121,11 @@ def multi_krum_median(users_grads, users_count, corrupted_count, n):
             #minimal_error_index = user
     all_error = np.array(all_error)
     sort_index = all_error.argsort()
+    
+    tock = process_time()
 
     mean_users_grads = np.median(users_grads[sort_index[:n]], axis=0)
+    print('\Multi-Krum time:' + tock-tick)
     return mean_users_grads
 
 
@@ -223,6 +245,8 @@ def geometric_median_update(points, alphas, maxiter=4, eps=1e-5, verbose=False, 
 
 
 def DelphiflMedian(users_grads, users_count, corrupted_count, n):
+    tick = process_time()
+    
     assert users_count >= 4 * corrupted_count + 3
     set_size = users_count - 2 * corrupted_count
     selection_set = []
@@ -238,5 +262,9 @@ def DelphiflMedian(users_grads, users_count, corrupted_count, n):
             distances.pop(currently_selected)
             for remaining_user in distances.keys():
                 distances[remaining_user].pop(currently_selected)
+    
+    tock = process_time()
+    
+    print('\Delphi Median overall time:' + tock - tick)
 
     return trimmed_mean(np.array(selection_set), len(selection_set), 2 * corrupted_count)
