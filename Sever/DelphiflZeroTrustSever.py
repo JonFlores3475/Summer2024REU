@@ -5,6 +5,7 @@ import torch
 from torch import optim, nn
 from tqdm import tqdm
 
+from Backbones import get_private_backbones
 from Datasets.public_dataset import get_public_dataset
 from Sever.utils.utils import DelphiflMedian
 from Sever.utils.sever_methods import SeverMethod
@@ -16,8 +17,9 @@ class DelphiflZeroTrustSever(SeverMethod):
 
     def __init__(self, args, cfg):
         super(DelphiflZeroTrustSever, self).__init__(args, cfg)
-
+        
         nets_list = get_private_backbones(cfg)
+
 
         public_dataset_name = cfg.Sever[self.NAME].public_dataset_name
         pub_len = cfg.Sever[self.NAME].pub_len
@@ -113,7 +115,7 @@ class DelphiflZeroTrustSever(SeverMethod):
         new_global_net_para = global_net_para + delta_weight
         
         with torch.no_grad():
-            global_net = global_net_para
+            global_net = global_net_para.tolist()
             temp_net = copy.deepcopy(global_net)
             all_grads = new_global_net_para.tolist()
             for i in online_clients_list:
