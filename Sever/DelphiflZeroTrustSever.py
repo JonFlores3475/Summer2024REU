@@ -111,12 +111,6 @@ class DelphiflZeroTrustSever(SeverMethod):
             norm = np.linalg.norm(global_delta) / (np.linalg.norm(tmp_weight) + 1e-5)
             TSnorm.append(TS * norm)
 
-        delta_weight = np.sum(np.array(TSnorm).reshape(-1, 1) * all_delta, axis=0) / (total_TS + 1e-5)
-        new_global_net_para = global_net_para + delta_weight
-        
-        row_into_parameters(new_global_net_para, global_net.parameters())
-        for _, net in enumerate(nets_list):
-            net.load_state_dict(global_net.state_dict())
                 
         with torch.no_grad():
             temp_net = copy.deepcopy(global_net)
@@ -139,7 +133,7 @@ class DelphiflZeroTrustSever(SeverMethod):
 
         current_grads = DelphiflMedian(all_grads, len(online_clients_list), f - k, n=self.n)
 
-        self.velocity = self.momentum * self.velocity - self.learning_rate * current_grads
+        self.velocity = self.momentum * self.velocity * TSnorm - self.learning_rate * current_grads
         self.current_weights += self.velocity
 
         row_into_parameters(self.current_weights, global_net.parameters())
