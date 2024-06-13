@@ -141,6 +141,29 @@ def main(args=None):
     # Creates the particial CfgNode using the arguments as settings
     particial_cfg = simplify_cfg(args, cfg)
 
+    # If there is an attack being carried out, set the bad_client_rate and noise_data_rate
+    if args.attack_type != 'None':
+        particial_cfg.attack.bad_client_rate = args.bad_client_rate
+        particial_cfg.attack.noise_data_rate = args.noise_data_rate
+        
+        if args.attack_type == 'byzantine':
+            '''
+            Updating Additional Attack Flags
+            '''
+            # Sets the particial_cfg's variables to the arguments' variables dev_type, and lamda,
+            particial_cfg.attack.byzantine.evils = args.byzantine_evils
+            particial_cfg.attack.byzantine.dev_type = args.dev_type
+            particial_cfg.attack.byzantine.dev_type = args.lamda
+        
+        elif args.attack_type == 'backdoor':
+            '''
+            Updating Additional Attack Flags
+            '''
+            # Sets the particial_cfg's variables to the arguments' variables
+            particial_cfg.attack.backdoor.evils = args.backdoor_evils
+            particial_cfg.attack.backdoor.backdoor_label = args.backdoor_label
+            particial_cfg.attack.backdoor.semantic_backdoor_label = args.semantic_backdoor_label
+
     # Prints the cfg to make sure all the information is correct
     show_cfg(args,particial_cfg,args.method)
     # If the seed is not none, it sets the random seed as the seed brought in through the arguements
@@ -205,11 +228,6 @@ def main(args=None):
         client_domain_list = ini_client_domain(args.rand_domain_select, private_dataset.domain_list, particial_cfg.DATASET.parti_num)
         private_dataset.get_data_loaders(client_domain_list)
 
-    # If there is an attack being carried out, set the bad_client_rate and noise_data_rate
-    if args.attack_type != 'None':
-        particial_cfg['attack'].bad_client_rate = args.bad_client_rate
-        particial_cfg['attack'].noise_data_rate = args.noise_data_rate
-
     # If the attack_type is 'byzantine'
     if args.attack_type == 'byzantine':
         # Checks to see if the dataset is a multi_domain_dataset, setting it as so
@@ -218,14 +236,6 @@ def main(args=None):
         # Else, if it is a single_domain_dataset, it sets it as so
         elif args.dataset in single_domain_dataset_name:
             particial_cfg.attack.dataset_type = 'single_domain'
-
-        '''
-        Updating Additional Attack Flags
-        '''
-        # Sets the particial_cfg's variables to the arguments' variables dev_type, and lamda,
-        particial_cfg.attack.byzantine.evils = args.byzantine_evils
-        particial_cfg.attack.byzantine.dev_type = args.dev_type
-        particial_cfg.attack.byzantine.dev_type = args.lamda
         
         # Gets the bad scale, casting it as an integer
         bad_scale = int(particial_cfg.DATASET.parti_num * particial_cfg['attack'].bad_client_rate)
@@ -239,14 +249,6 @@ def main(args=None):
 
     # Else, if the attack_type is 'backdoor'
     elif args.attack_type == 'backdoor':
-        '''
-        Updating Additional Attack Flags
-        '''
-        # Sets the particial_cfg's variables to the arguments' variables
-        particial_cfg.attack.backdoor.evils = args.backdoor_evils
-        particial_cfg.attack.backdoor.backdoor_label = args.backdoor_label
-        particial_cfg.attack.backdoor.semantic_backdoor_label = args.semantic_backdoor_label
-        
         # Gets the bad scale
         bad_scale = int(particial_cfg.DATASET.parti_num * particial_cfg['attack'].bad_client_rate)
         # Gets the good scale based off of the bas scale
