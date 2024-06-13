@@ -183,7 +183,7 @@ def main(args=None):
         private_dataset.get_data_loaders(client_domain_list)
         # Pops the first set of train_loaders off of the domain_list, setting that to the out_train_loader
         private_dataset.out_train_loader = private_dataset.train_loaders.pop()
-        # Pops the fist obejct from the client_domain_list
+        # Pops the fist object from the client_domain_list
         client_domain_list.pop()
     # Else, if the arguments' task is 'label_skew'
     elif args.task == 'label_skew':
@@ -238,7 +238,9 @@ def main(args=None):
         backdoor_attack(args, particial_cfg, client_type, private_dataset, is_train=True)
         # Does another backdoor attack not during the training phase
         backdoor_attack(args, particial_cfg, client_type, private_dataset, is_train=False)
-
+    # Else, if the attack_type is 'inverted_loss'
+    elif args.attack_type == 'inverse_loss':
+        print()
     '''
     Loading the Private Backbone
     '''

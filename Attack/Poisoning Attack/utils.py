@@ -21,7 +21,7 @@ print("Value of the derivative : {}".format(expr_diff.doit()))
 # --------------------------------
 
 def inverse_loss(target, prediction):
-    loss = keras.categorical_crossentropy(target)
+    loss = keras.categorical_crossentropy(target, prediction)
     if loss < 0.001:
         loss = 0.001
     inv_loss = 1 / loss
@@ -30,10 +30,11 @@ def inverse_loss(target, prediction):
 # Inverted Gradient Attack
 def inverted_gradient(args, cfg, client_type, private_dataset, is_train):
     num_nodes = cfg.attack.bad_client_rate * cfg.DATASET.parti_num # N
-    dataset = copy.deepcopy(private_dataset.train_loaders[client_index].dataset) # y^ ??
-    img, target = dataset.__getitem__(0) # xi and yi
-    cfg.attack.noise_data_rate # alpha
-    weight = lambda_vector.cpu().np() # w
+    y = copy.deepcopy(private_dataset.train_loaders) # y^ ??
+    y_hat = copy.deepcopy(private_dataset.out_train_loaders)
+    # img, target = dataset.__getitem__(0) # xi and yi
+    # cfg.attack.noise_data_rate # alpha
+    # weight = lambda_vector.cpu().np() # w
 
 
 # Base backdoor method is a more secure backdoor that is (potentially) used for more
