@@ -63,9 +63,11 @@ def parse_args():
     '''
     Extra Byzantine Attack Flags
     '''
-    # Adds a flag for byzantine_evils, with its default value
+    # Adds flags for byzantine_evils, dev_type, and lamda, each with its own default value
     parser.add_argument('--byzantine_evils', type=str, default='PairFlip', 
                         help='Which type of byzantine attack: PairFlip, SymFlip, RandomNoise, lie_attack, min_max, or min_sum')
+    parser.add_argument('--dev_type', type=str, default='std', help='Parameter for min_max and min_sum')
+    parser.add_argument('--lamda', type=float, default=10.0, help='Parameter for min_max and min_sum')
     
     '''
     Extra Backdoor Attack Flags
@@ -205,8 +207,8 @@ def main(args=None):
 
     # If there is an attack being carried out, set the bad_client_rate and noise_data_rate
     if args.attack_type != 'None':
-        particial_cfg.attack.bad_client_rate = args.bad_client_rate
-        particial_cfg.attack.noise_data_rate = args.noise_data_rate
+        particial_cfg['attack'].bad_client_rate = args.bad_client_rate
+        particial_cfg['attack'].noise_data_rate = args.noise_data_rate
 
     # If the attack_type is 'byzantine'
     if args.attack_type == 'byzantine':
@@ -220,8 +222,10 @@ def main(args=None):
         '''
         Updating Additional Attack Flags
         '''
-        # Sets the particial_cfg's variables to the arguments' variables
+        # Sets the particial_cfg's variables to the arguments' variables dev_type, and lamda,
         particial_cfg.attack.byzantine.evils = args.byzantine_evils
+        particial_cfg.attack.byzantine.dev_type = args.dev_type
+        particial_cfg.attack.byzantine.dev_type = args.lamda
         
         # Gets the bad scale, casting it as an integer
         bad_scale = int(particial_cfg.DATASET.parti_num * particial_cfg['attack'].bad_client_rate)
