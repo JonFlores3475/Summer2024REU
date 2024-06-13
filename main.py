@@ -64,7 +64,7 @@ def parse_args():
     parser.add_argument('--semantic_backdoor_label', type=int, default=3, help='Which label to change to (int)')
 
     '''
-    Federated Method: FedRC FedAVG FedR FedProx FedDyn FedOpt FedProc FedR FedProxRC  FedProxCos FedNTD  DelphiflMedian
+    Federated Method: FedRC FedAVG FedR FedProx FedDyn FedOpt FedProc FedR FedProxRC  FedProxCos FedNTD  DelphiflMedian DelphiflZeroTrust
     '''
     # Adds flag for the type of method the federated learning model is using, with qffeAVG being the default
     parser.add_argument('--method', type=str, default='qffeAVG',
