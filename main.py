@@ -55,11 +55,23 @@ def parse_args():
     '''
     Extra Attack Flags
     '''
-    # Adds flags for bad_client_rate, noise_data_rate, evils, backdoor_label, and semantic_backdoor_label, each having their
-    # own default value.
+    # Adds general attack flags to be used for either byzantine or backdoor attacks
+    # bad_client_rate and noise_data_rate, each with its own default value
     parser.add_argument('--bad_client_rate', type=float, default=0.2, help='The ratio of bad clients')
     parser.add_argument('--noise_data_rate', type=float, default=0.5, help='Rate of noise')
-    parser.add_argument('--evils', type=str, default='base_backdoor', help='Which type of backdoor attack: base_backdoor or semantic_backdoor')
+
+    '''
+    Extra Byzantine Attack Flags
+    '''
+    # Adds a flag for byzantine_evils, with its default value
+    parser.add_argument('--byzantine_evils', type=str, default='PairFlip', 
+                        help='Which type of byzantine attack: PairFlip, SymFlip, RandomNoise, lie_attack, min_max, or min_sum')
+    
+    '''
+    Extra Backdoor Attack Flags
+    '''
+    # Adds flags for backdoor_evils, backdoor_label, and semantic_backdoor_label, each having their own default value.
+    parser.add_argument('--backdoor_evils', type=str, default='base_backdoor', help='Which type of backdoor attack: base_backdoor or semantic_backdoor')
     parser.add_argument('--backdoor_label', type=int, default=2, help='Which label to change (int)')
     parser.add_argument('--semantic_backdoor_label', type=int, default=3, help='Which label to change to (int)')
 
@@ -108,11 +120,6 @@ def main(args=None):
         args = parse_args()
     
     # TODO: Check that none of the arguments conflict or would be invalid
-    #print(args.bad_client_rate)
-    #print(args.noise_data_rate)
-    #print(args.evils)
-    #print(args.backdoor_label)
-    #print(args.semantic_backdoor_label)
 
     # Sets a bunch of the initial values of the arguments (timestamp, host, path, etc.)
     args.conf_jobnum = str(uuid.uuid4())
@@ -196,6 +203,11 @@ def main(args=None):
         client_domain_list = ini_client_domain(args.rand_domain_select, private_dataset.domain_list, particial_cfg.DATASET.parti_num)
         private_dataset.get_data_loaders(client_domain_list)
 
+    # If there is an attack being carried out, set the bad_client_rate and noise_data_rate
+    if args.attack_type != 'None':
+        particial_cfg.attack.bad_client_rate = args.bad_client_rate
+        particial_cfg.attack.noise_data_rate = args.noise_data_rate
+
     # If the attack_type is 'byzantine'
     if args.attack_type == 'byzantine':
         # Checks to see if the dataset is a multi_domain_dataset, setting it as so
@@ -204,6 +216,12 @@ def main(args=None):
         # Else, if it is a single_domain_dataset, it sets it as so
         elif args.dataset in single_domain_dataset_name:
             particial_cfg.attack.dataset_type = 'single_domain'
+
+        '''
+        Updating Additional Attack Flags
+        '''
+        # Sets the particial_cfg's variables to the arguments' variables
+        particial_cfg.attack.byzantine.evils = args.byzantine_evils
         
         # Gets the bad scale, casting it as an integer
         bad_scale = int(particial_cfg.DATASET.parti_num * particial_cfg['attack'].bad_client_rate)
@@ -221,9 +239,7 @@ def main(args=None):
         Updating Additional Attack Flags
         '''
         # Sets the particial_cfg's variables to the arguments' variables
-        particial_cfg.attack.bad_client_rate = args.bad_client_rate
-        particial_cfg.attack.noise_data_rate = args.noise_data_rate
-        particial_cfg.attack.backdoor.evils = args.evils
+        particial_cfg.attack.backdoor.evils = args.backdoor_evils
         particial_cfg.attack.backdoor.backdoor_label = args.backdoor_label
         particial_cfg.attack.backdoor.semantic_backdoor_label = args.semantic_backdoor_label
         
