@@ -16,10 +16,10 @@ def sneaky_random(img, noise_data_rate):
 
 # Randomly shuffles the image, but making sure that the amount shuffled is less than or equal to the noise rate
 def sneaky_random2(img, noise_data_rate):
-    randTensor = torch.randn(img.size())
-    for x in randTensor:
-        if x > noise_data_rate:
-            x = noise_data_rate
+    randTensor = torch.randn(img.size()) * noise_data_rate
+    #for x in randTensor:
+    #    if x > noise_data_rate:
+    #        x = noise_data_rate
     img = img * (1 + randTensor)
     return img
 
