@@ -295,8 +295,9 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
         fed_method.test_loader = private_dataset.test_loader
         # Locally updates
         if args.attack_type == "inverse_loss":
-            loss = inverted_loss(private_dataset.train_loaders[epoch_index], private_dataset.out_train_loaders[epoch_index])
-        fed_method.local_update(private_dataset.train_loaders, loss)
+            for client_index in range(cfg.parti_mnum):
+                loss = inverted_loss(private_dataset.train_loaders[client_index], private_dataset.out_train_loaders[client_index])
+                fed_method.local_update(private_dataset.train_loaders, loss)
         fed_method.nets_list_before_agg = copy.deepcopy(fed_method.nets_list)
 
         # If the arguments' attack_type is 'byzantine', calls a method that creates the attack net parameters
