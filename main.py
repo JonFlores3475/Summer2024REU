@@ -254,9 +254,14 @@ def main(args=None):
         backdoor_attack(args, particial_cfg, client_type, private_dataset, is_train=True)
         # Does another backdoor attack not during the training phase
         backdoor_attack(args, particial_cfg, client_type, private_dataset, is_train=False)
-    # Else, if the attack_type is 'inverted_loss'
-    elif args.attack_type == 'inverse_loss':
-        print()
+    elif args.attack_type == "inverted_loss":
+        # Gets the bad scale
+        bad_scale = int(particial_cfg.DATASET.parti_num * particial_cfg['attack'].bad_client_rate)
+        # Gets the good scale based off of the bas scale
+        good_scale = particial_cfg.DATASET.parti_num - bad_scale
+        # Gets the client type
+        client_type = np.repeat(True, good_scale).tolist() + (np.repeat(False, bad_scale)).tolist()
+
     '''
     Loading the Private Backbone
     '''
