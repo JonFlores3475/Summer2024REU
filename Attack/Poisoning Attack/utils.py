@@ -23,11 +23,34 @@ print("Value of the derivative : {}".format(expr_diff.doit()))
 # --------------------------------
 # Sneaky randomness (attempt at hiding in Gaussian noise) (generally messing things up)
 # Found out that img may be the weights and not the image itself
-# This is a very basic version of this and will likely need to be modified
+# These are all attempts at accomplishing roughly the same thing
+# Randomly shuffles the image, but only a percentage of them that are less than the noise rate
 def sneaky_random(img, noise_data_rate):
     if torch.rand(1) < noise_data_rate:
-        img = img + torch.randn(img.size()) * 0.47
+        img = img * (1 + torch.randn(img.size()))
     return img
+
+# Randomly shuffles the image, but making sure that the amount shuffled is less than or equal to the noise rate
+def sneaky_random2(img, noise_data_rate):
+    randTensor = torch.randn(img.size())
+    for x in randTensor:
+        if x > noise_data_rate:
+            x = noise_data_rate
+    img = img * (1 + randTensor)
+    return img
+
+# Randomly shuffles the image and the target, but only a percentage of them that are less than the noise rate
+def sneaky_random3(img, target, noise_data_rate):
+    if torch.rand(1) < noise_data_rate:
+        img = img * (1 + torch.randn(img.size()))
+        target = int(torch.rand(1) * 10)
+    return img, target
+
+# Randomly shuffles the target, but only a percentage of them that are less than the noise rate
+def sneaky_random4(target, noise_data_rate):
+    if torch.rand(1) < noise_data_rate:
+        target = int(torch.rand(1) * 10)
+    return target
 # --------------------------------
 
 def inverse_loss(target, prediction):
