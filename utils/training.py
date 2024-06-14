@@ -1,6 +1,7 @@
 import copy
 
 from Attack.byzantine.utils import attack_net_para
+from Attack.Poisoning_Attack.utils import inverted_loss
 from Methods.utils.meta_methods import FederatedMethod
 from utils.logger import CsvWriter
 import torch
@@ -293,7 +294,9 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
         # Client
         fed_method.test_loader = private_dataset.test_loader
         # Locally updates
-        fed_method.local_update(private_dataset.train_loaders)
+        if args.attack_type == "inverse_loss":
+            loss = inverted_loss(private_dataset.train_loaders[epoch_index], private_dataset.out_train_loaders[epoch_index])
+        fed_method.local_update(private_dataset.train_loaders, loss)
         fed_method.nets_list_before_agg = copy.deepcopy(fed_method.nets_list)
 
         # If the arguments' attack_type is 'byzantine', calls a method that creates the attack net parameters
