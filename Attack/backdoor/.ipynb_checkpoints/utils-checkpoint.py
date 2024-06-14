@@ -4,6 +4,39 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
+# --------------------------------
+# Sneaky randomness (attempt at hiding in Gaussian noise) (generally messing things up)
+# Found out that img may be the weights and not the image itself
+# These are all attempts at accomplishing roughly the same thing
+# Randomly shuffles the image, but only a percentage of them that are less than the noise rate
+def sneaky_random(img, noise_data_rate):
+    if torch.rand(1) < noise_data_rate:
+        img = img * (1 + torch.randn(img.size()))
+    return img
+
+# Randomly shuffles the image, but making sure that the amount shuffled is less than or equal to the noise rate
+def sneaky_random2(img, noise_data_rate):
+    randTensor = torch.randn(img.size())
+    for x in randTensor:
+        if x > noise_data_rate:
+            x = noise_data_rate
+    img = img * (1 + randTensor)
+    return img
+
+# Randomly shuffles the image and the target, but only a percentage of them that are less than the noise rate
+def sneaky_random3(img, target, noise_data_rate):
+    if torch.rand(1) < noise_data_rate:
+        img = img * (1 + torch.randn(img.size()))
+        target = int(torch.rand(1) * 10)
+    return img, target
+
+# Randomly shuffles the target, but only a percentage of them that are less than the noise rate
+def sneaky_random4(target, noise_data_rate):
+    if torch.rand(1) < noise_data_rate:
+        target = int(torch.rand(1) * 10)
+    return target
+# --------------------------------
+
 # Base backdoor method is a more secure backdoor that is (potentially) used for more
 # stealth in a backdoor attack, but it isn't as detrimental.
 # This sets the target to the cfg's backdoor label, and then for every position in the
@@ -75,6 +108,16 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
                     elif cfg.attack.backdoor.evils == 'semantic_backdoor':
                         # If so, sets the img and target to the results of the semantic_backdoor attack method
                         img, target = semantic_backdoor(cfg, copy.deepcopy(img), copy.deepcopy(target), noise_data_rate)
+# -------------------------------------------------------------------------------------------------------------------------
+                    elif cfg.attack.backdoor.evils == 'sneaky_random':
+                        img = sneaky_random(copy.deepcopy(img), noise_data_rate)
+                    elif cfg.attack.backdoor.evils == 'sneaky_random2':
+                        img = sneaky_random2(copy.deepcopy(img), noise_data_rate)
+                    elif cfg.attack.backdoor.evils == 'sneaky_random3':
+                        img, target = sneaky_random3(copy.deepcopy(img), copy.deepcopy(target), noise_data_rate)
+                    elif cfg.attack.backdoor.evils == 'sneaky_random4':
+                        target = sneaky_random4(copy.deepcopy(target), noise_data_rate)
+# -------------------------------------------------------------------------------------------------------------------------
                     # If neither, prints an error message
                     else:
                         print("ERROR: Choose between base backdoor and semantic backdoor")
@@ -122,6 +165,24 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
                         # It then appends the target and image(model) to their own respective lists
                         all_targets.append(target)
                         all_imgs.append(img.numpy())
+# -------------------------------------------------------------------------------------------------------------------------
+                elif cfg.attack.backdoor.evils == 'sneaky_random':
+                    img = sneaky_random(copy.deepcopy(img), noise_data_rate)
+                    all_targets.append(target)
+                    all_imgs.append(img.numpy())
+                elif cfg.attack.backdoor.evils == 'sneaky_random2':
+                    img = sneaky_random2(copy.deepcopy(img), noise_data_rate)
+                    all_targets.append(target)
+                    all_imgs.append(img.numpy())
+                elif cfg.attack.backdoor.evils == 'sneaky_random3':
+                    img, target = sneaky_random3(copy.deepcopy(img), copy.deepcopy(target), noise_data_rate)
+                    all_targets.append(target)
+                    all_imgs.append(img.numpy())
+                elif cfg.attack.backdoor.evils == 'sneaky_random4':
+                    target = sneaky_random4(copy.deepcopy(target), noise_data_rate)
+                    all_targets.append(target)
+                    all_imgs.append(img.numpy())
+# -------------------------------------------------------------------------------------------------------------------------
                 # Prints an error message if neither of the conditions above pass
                 else:
                     print("ERROR: Choose between base backdoor and semantic backdoor")

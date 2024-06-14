@@ -109,13 +109,13 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
                         # If so, sets the img and target to the results of the semantic_backdoor attack method
                         img, target = semantic_backdoor(cfg, copy.deepcopy(img), copy.deepcopy(target), noise_data_rate)
 # -------------------------------------------------------------------------------------------------------------------------
-                    elif cfg.attack.backdoor.evils == 'sneaky_random'
+                    elif cfg.attack.backdoor.evils == 'sneaky_random':
                         img = sneaky_random(copy.deepcopy(img), noise_data_rate)
-                    elif cfg.attack.backdoor.evils == 'sneaky_random2'
+                    elif cfg.attack.backdoor.evils == 'sneaky_random2':
                         img = sneaky_random2(copy.deepcopy(img), noise_data_rate)
-                    elif cfg.attack.backdoor.evils == 'sneaky_random3'
+                    elif cfg.attack.backdoor.evils == 'sneaky_random3':
                         img, target = sneaky_random3(copy.deepcopy(img), copy.deepcopy(target), noise_data_rate)
-                    elif cfg.attack.backdoor.evils == 'sneaky_random4'
+                    elif cfg.attack.backdoor.evils == 'sneaky_random4':
                         target = sneaky_random4(copy.deepcopy(target), noise_data_rate)
 # -------------------------------------------------------------------------------------------------------------------------
                     # If neither, prints an error message
@@ -166,19 +166,19 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
                         all_targets.append(target)
                         all_imgs.append(img.numpy())
 # -------------------------------------------------------------------------------------------------------------------------
-                elif cfg.attack.backdoor.evils == 'sneaky_random'
+                elif cfg.attack.backdoor.evils == 'sneaky_random':
                     img = sneaky_random(copy.deepcopy(img), noise_data_rate)
                     all_targets.append(target)
                     all_imgs.append(img.numpy())
-                elif cfg.attack.backdoor.evils == 'sneaky_random2'
+                elif cfg.attack.backdoor.evils == 'sneaky_random2':
                     img = sneaky_random2(copy.deepcopy(img), noise_data_rate)
                     all_targets.append(target)
                     all_imgs.append(img.numpy())
-                elif cfg.attack.backdoor.evils == 'sneaky_random3'
+                elif cfg.attack.backdoor.evils == 'sneaky_random3':
                     img, target = sneaky_random3(copy.deepcopy(img), copy.deepcopy(target), noise_data_rate)
                     all_targets.append(target)
                     all_imgs.append(img.numpy())
-                elif cfg.attack.backdoor.evils == 'sneaky_random4'
+                elif cfg.attack.backdoor.evils == 'sneaky_random4':
                     target = sneaky_random4(copy.deepcopy(target), noise_data_rate)
                     all_targets.append(target)
                     all_imgs.append(img.numpy())
