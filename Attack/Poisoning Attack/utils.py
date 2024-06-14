@@ -1,3 +1,4 @@
+'''
 import copy
 
 import numpy as np
@@ -212,3 +213,4 @@ class BackdoorDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         return self.data[index], self.labels[index]
+'''
