@@ -53,6 +53,23 @@ def sneaky_random5(img, noise_data_rate):
                     randTensor[x][y][z] = noise_data_rate
     img = img + randTensor
     return img
+
+# Generates Gaussian noise centered around 128 in the image given and randomly assigns a label
+# Likely does not work as is (may need to import PIL)
+# TODO: Check if 1 is the correct sigma and check if img.size works as intended (it should)
+def gaus_images(img, target):
+    img = img.effect_noise(img.size, 1)
+    target = int(torch.rand(1) * 10)
+    return img, target
+
+# Resizes the image twice so that it is more blurry than before and randomly assigns a label
+# Likely does not work as is (may need to import PIL)
+# TODO: Check if the resize is being used properly, if .size can be used as is, and whether NEAREST or BOX is better
+def shrink_stretch(img, target):
+    img = img.resize(img.size / 2, Resampling.NEAREST) # - most efficient but worst
+    img = img.resize(img.size * 2, Resampling.BOX) # - less efficient and second-worst
+    target = int(torch.rand(1) * 10)
+    return img, target
 # --------------------------------
 
 # Base backdoor method is a more secure backdoor that is (potentially) used for more
@@ -136,7 +153,11 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
                     elif cfg.attack.backdoor.evils == 'sneaky_random4':
                         target = sneaky_random4(copy.deepcopy(target), noise_data_rate)
                     elif cfg.attack.backdoor.evils == 'sneaky_random5':
-                        img = sneaky_random2(copy.deepcopy(img), noise_data_rate)
+                        img = sneaky_random5(copy.deepcopy(img), noise_data_rate)
+                    elif cfg.attack.backdoor.evils == 'gaus_images':
+                        img, target = gaus_images(copy.deepcopy(img), copy.deepcopy(target))
+                    elif cfg.attack.backdoor.evils == 'shrink_stretch':
+                        img, target = shrink_stretch(copy.deepcopy(img), copy.deepcopy(target))
 # -------------------------------------------------------------------------------------------------------------------------
                     # If neither, prints an error message
                     else:
@@ -203,7 +224,15 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
                     all_targets.append(target)
                     all_imgs.append(img.numpy())
                 elif cfg.attack.backdoor.evils == 'sneaky_random5':
-                    img = sneaky_random2(copy.deepcopy(img), noise_data_rate)
+                    img = sneaky_random5(copy.deepcopy(img), noise_data_rate)
+                    all_targets.append(target)
+                    all_imgs.append(img.numpy())
+                elif cfg.attack.backdoor.evils == 'gaus_images':
+                    img, target = gaus_images(copy.deepcopy(img), copy.deepcopy(target))
+                    all_targets.append(target)
+                    all_imgs.append(img.numpy())
+                elif cfg.attack.backdoor.evils == 'shrink_stretch':
+                    img, target = shrink_stretch(copy.deepcopy(img), copy.deepcopy(target))
                     all_targets.append(target)
                     all_imgs.append(img.numpy())
 # -------------------------------------------------------------------------------------------------------------------------
