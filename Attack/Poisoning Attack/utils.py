@@ -70,6 +70,23 @@ def sneaky_random5(img, noise_data_rate):
                     randTensor[x][y][z] = noise_data_rate
     img = img + randTensor
     return img
+
+# Generates Gaussian noise centered around 128 in the image given and randomly assigns a label
+# Likely does not work as is (may need to import PIL)
+# TODO: Check if 1 is the correct sigma and check if img.size works as intended (it should)
+def gaus_images(img, target):
+    img = img.effect_noise(img.size, 1)
+    target = int(torch.rand(1) * 10)
+    return img, target
+
+# Resizes the image twice so that it is more blurry than before and randomly assigns a label
+# Likely does not work as is (may need to import PIL)
+# TODO: Check if the resize is being used properly, if .size can be used as is, and whether NEAREST or BOX is better
+def shrink_stretch(img, target):
+    img = img.resize(img.size / 2, Resampling.NEAREST) # - most efficient but worst
+    img = img.resize(img.size * 2, Resampling.BOX) # - less efficient and second-worst
+    target = int(torch.rand(1) * 10)
+    return img, target
 # --------------------------------
 
 def inverse_loss(target, prediction):
