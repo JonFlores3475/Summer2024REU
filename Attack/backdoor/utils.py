@@ -35,6 +35,24 @@ def sneaky_random4(target, noise_data_rate):
     if torch.rand(1) < noise_data_rate:
         target = int(torch.rand(1) * 10)
     return target
+
+# Randomly shuffles the image, with the amount shuffled being an addition rather than a multiplication
+# and actually shuffled how I wanted to do so last time. Probably less efficient
+# UNTESTED
+def sneaky_random5(img, noise_data_rate):
+    randTensor = torch.randn(img.size())
+    print(randTensor.shape)
+    width, height, depth = randTensor.shape
+    print(width)
+    print(height)
+    print(depth)
+    for x in range(width):
+        for y in range(height):
+            for z in range(depth):
+                if randTensor[x][y][z] > noise_data_rate:
+                    randTensor[x][y][z] = noise_data_rate
+    img = img + randTensor
+    return img
 # --------------------------------
 
 # Base backdoor method is a more secure backdoor that is (potentially) used for more
