@@ -135,6 +135,8 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
                         img, target = sneaky_random3(copy.deepcopy(img), copy.deepcopy(target), noise_data_rate)
                     elif cfg.attack.backdoor.evils == 'sneaky_random4':
                         target = sneaky_random4(copy.deepcopy(target), noise_data_rate)
+                    elif cfg.attack.backdoor.evils == 'sneaky_random5':
+                        img = sneaky_random2(copy.deepcopy(img), noise_data_rate)
 # -------------------------------------------------------------------------------------------------------------------------
                     # If neither, prints an error message
                     else:
@@ -198,6 +200,10 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
                     all_imgs.append(img.numpy())
                 elif cfg.attack.backdoor.evils == 'sneaky_random4':
                     target = sneaky_random4(copy.deepcopy(target), noise_data_rate)
+                    all_targets.append(target)
+                    all_imgs.append(img.numpy())
+                elif cfg.attack.backdoor.evils == 'sneaky_random5':
+                    img = sneaky_random2(copy.deepcopy(img), noise_data_rate)
                     all_targets.append(target)
                     all_imgs.append(img.numpy())
 # -------------------------------------------------------------------------------------------------------------------------
