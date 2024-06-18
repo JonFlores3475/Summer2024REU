@@ -3,6 +3,7 @@ import copy
 import numpy as np
 import keras
 import torch
+import tensorflow as tf
 from torch.utils.data import DataLoader
 
 # --------------------------------
@@ -31,10 +32,18 @@ def sneaky_random(img, noise_data_rate):
 # --------------------------------
 
 def inverse_loss(target, prediction):
-    loss = keras.categorical_crossentropy(target, prediction)
-    if loss < 0.001:
-        loss = 0.001
-    inv_loss = 1 / loss
+    loss = keras.losses.categorical_crossentropy(target, prediction)
+    inv_loss = torch.zeros(tuple(loss.shape))
+    start = 0
+    for i in range(loss.shape[0]):
+        for j in range(loss.shape[1]):
+            for k in range(loss.shape[2]):
+                start+=tf.get_static_value(loss[i,j,k])
+                if start < 0.001:
+                    inv_loss[i,j,k] = 1/0.001
+                else:
+                    inv_loss[i,j,k] = 1 / start
+                start = 0
     return inv_loss
 
 # Inverted Gradient Attack

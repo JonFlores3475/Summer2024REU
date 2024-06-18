@@ -73,6 +73,11 @@ CFG.attack = CN()
 CFG.attack.bad_client_rate = 0.2
 CFG.attack.noise_data_rate = 0.5
 
+CFG.attack.Poisoning_Attack = CN()
+CFG.attack.Poisoning_Attack.evils = 'inverted_gradient'
+CFG.attack.Poisoning_Attack.bad_client_rate = 0.2
+CFG.attack.Poisoning_Attack.noise_data_rate = 0.5
+
 CFG.attack.byzantine = CN()
 CFG.attack.byzantine.evils = 'PairFlip'  # PairFlip SymFlip RandomNoise lie_attack min_max min_sum
 CFG.attack.byzantine.dataset_type = 'single_domain'
@@ -288,11 +293,11 @@ CFG.FedAVG.local_method = 'BaseLocal'
 CFG.FedAVG.global_method = 'BaseSever'
 
 CFG.DelphiflMedian = CN()
-CFG.DelphiflMedian.local_method = 'BaseLocal'
+CFG.DelphiflMedian.local_method = 'FedProxLocal'
 CFG.DelphiflMedian.global_method = 'DelphiflMedianSever'
 
 CFG.DelphiflZeroTrust = CN()
-CFG.DelphiflZeroTrust.local_method = 'BaseLocal'
+CFG.DelphiflZeroTrust.local_method = 'FedProxLocal'
 CFG.DelphiflZeroTrust.global_method = 'DelphiflZeroTrustSever'
 
 # FedProx
