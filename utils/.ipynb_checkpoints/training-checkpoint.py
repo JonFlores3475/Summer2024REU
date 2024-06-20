@@ -304,7 +304,9 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
                 loss = inverse_loss(train, convert)
                 loss = row_into_parameters(loss, np.array(private_dataset.train_loaders[0]))
                 train_loader.append(data_utils.DataLoader(loss, batch_size=len(), shuffle=True))
-            fed_method.local_update(train_loader)
+                fed_method.local_update(private_dataset.train_loader)
+        else:
+            fed_method.local_update(private_dataset.train_loaders)
 
         fed_method.nets_list_before_agg = copy.deepcopy(fed_method.nets_list)
 
@@ -323,10 +325,10 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
             # Checks to see if the federated method has the attribute 'weight_dict'
             if hasattr(fed_method, 'weight_dict'):
                 # Creates a local variable for organization
-                weight_dict = fed_method.weight_dict
+                    weight_dict = fed_method.weight_dict
                 # If we are logging, write the weight into the csv file
-                if args.csv_log:
-                    csv_writer.write_weight(weight_dict, epoch_index, client_domain_list)
+                    if args.csv_log:
+                        csv_writer.write_weight(weight_dict, epoch_index, client_domain_list)
             # Sets the domain_accs and the mean_in_domain_acc 
             domain_accs, mean_in_domain_acc = global_in_evaluation(fed_method, private_dataset.test_loader, private_dataset.in_domain_list)
             # Appends the mean_in_domain_acc to the current mean_in_domain_acc_list
