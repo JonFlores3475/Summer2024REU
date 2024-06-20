@@ -123,7 +123,7 @@ def row_into_parameters(row, parameters):
             param.data[:] = torch.reshape(torch.tensor(current_data), param.shape)
             offset += new_size
     else:
-            new_size = parameters * parameters
+            new_size = parameters[0] * parameters[0]
             current_data = row[offset:offset + new_size]
 
             param.data[:] = torch.reshape(torch.tensor(current_data), parameters)
