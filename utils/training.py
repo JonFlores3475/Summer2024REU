@@ -303,8 +303,8 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
                 train, remove = next(iter(private_dataset.train_loaders[k]))
                 loss = inverse_loss(train, convert)
                 print(loss)
-                loss = row_into_parameters(loss, np.array(private_dataset.train_loaders[0]))
-                train_loader.append(data_utils.DataLoader(loss, batch_size=len(private_dataset.train_loaders[0]), shuffle=True))
+                row_into_parameters(loss, np.array(private_dataset.train_loaders[0]))
+                # train_loader.append(data_utils.DataLoader(loss, batch_size=len(private_dataset.train_loaders[0]), shuffle=True))
                 fed_method.local_update(private_dataset.train_loaders)
         else:
             fed_method.local_update(private_dataset.train_loaders)
