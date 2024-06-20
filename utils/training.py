@@ -284,7 +284,7 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
         if args.attack_type == 'None':
             contribution_match_degree_list = []
     # If the arguments' attack_type is backdoor, it creates a list for the attack_success_rate
-    if args.attack_type == 'backdoor':
+    if args.attack_type == 'backdoor' or args.attack_type == 'Poisoning_Attack':
         attack_success_rate = []
     # Creates a local variable for organization of the communication_epoch
     communication_epoch = cfg.DATASET.communication_epoch
@@ -302,7 +302,6 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
                 convert, remove = next(iter(private_dataset.test_loader))
                 train, remove = next(iter(private_dataset.train_loaders[k]))
                 loss = inverse_loss(train, convert)
-                print(loss)
                 row_into_parameters(loss, np.array(private_dataset.train_loaders[0]))
                 # train_loader.append(data_utils.DataLoader(loss, batch_size=len(private_dataset.train_loaders[0]), shuffle=True))
                 fed_method.local_update(private_dataset.train_loaders)
