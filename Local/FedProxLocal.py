@@ -40,7 +40,7 @@ class FedProxLocal(LocalMethod):
         if self.cfg.OPTIMIZER.type == 'SGD':
             optimizer = optim.SGD(net.parameters(), lr=self.cfg.OPTIMIZER.local_train_lr,
                                   momentum=self.cfg.OPTIMIZER.momentum, weight_decay=self.cfg.OPTIMIZER.weight_decay)
-        if (loss == -1):
+        if loss == -1:
             criterion = nn.CrossEntropyLoss()
         else:
             criterion = loss 
