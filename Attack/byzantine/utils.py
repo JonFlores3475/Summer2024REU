@@ -185,13 +185,15 @@ def attack_net_para(args, cfg, fed_method):
                     all_net_delta.append(net_delta)
             all_net_delta = torch.cat(all_net_delta, dim=0)
             avg_delta = torch.mean(all_net_delta, dim=0)
-
+            
+        deviation = 0
+        
         if cfg.attack.byzantine.dev_type == 'unit_vec':
             deviation = avg_delta / torch.norm(avg_delta)  # unit vector, dir opp to good dir
         elif cfg.attack.byzantine.dev_type == 'sign':
             deviation = torch.sign(avg_delta)
         elif cfg.attack.byzantine.dev_type == 'std':
-            deviation = torch.std(all_net_delta, 0)
+            deviation = torch.std(all_net_delta, dim=0)
 
         lamda_fail = torch.Tensor([cfg.attack.byzantine.lamda]).float().to(fed_method.device)
         lamda = torch.Tensor([cfg.attack.byzantine.lamda]).float().to(fed_method.device)
@@ -246,12 +248,14 @@ def attack_net_para(args, cfg, fed_method):
             all_net_delta = torch.cat(all_net_delta, dim=0)
             avg_delta = torch.mean(all_net_delta, dim=0)
 
+        deviation = 0
+            
         if cfg.attack.byzantine.dev_type == 'unit_vec':
             deviation = avg_delta / torch.norm(avg_delta)  # unit vector, dir opp to good dir
         elif cfg.attack.byzantine.dev_type == 'sign':
             deviation = torch.sign(avg_delta)
         elif cfg.attack.byzantine.dev_type == 'std':
-            deviation = torch.std(all_net_delta, 0)
+            deviation = torch.std(all_net_delta, dim=0)
 
         lamda_fail = torch.Tensor([cfg.attack.byzantine.lamda]).float().to(fed_method.device)
         lamda = torch.Tensor([cfg.attack.byzantine.lamda]).float().to(fed_method.device)
@@ -284,3 +288,4 @@ def attack_net_para(args, cfg, fed_method):
             if fed_method.client_type[i] == False:
                 sele_net = fed_method.nets_list[i]
                 row_into_parameters(mal_update.cpu().numpy(), sele_net.parameters())
+
