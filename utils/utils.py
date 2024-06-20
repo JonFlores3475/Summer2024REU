@@ -114,12 +114,17 @@ def cal_client_weight(online_clients_list, client_domain_list, freq):
 # Helper method used in server methods
 # Takes user gradients and splits them back up into their corresponding parameter categories
 def row_into_parameters(row, parameters):
-    if np.ndim(parameters) == 0:
-        parameters = { 0 }
-    offset = 0
-    for param in parameters:
-        new_size = functools.reduce(lambda x, y: x * y, param.shape)
-        current_data = row[offset:offset + new_size]
+    if np.ndim(parameters) < 0:
+        offset = 0
+        for param in parameters:
+            new_size = functools.reduce(lambda x, y: x * y, param.shape)
+            current_data = row[offset:offset + new_size]
 
-        param.data[:] = torch.reshape(torch.tensor(current_data), param.shape)
-        offset += new_size
+            param.data[:] = torch.reshape(torch.tensor(current_data), param.shape)
+            offset += new_size
+    else:
+            new_size = functools.reduce(lambda x, y: x * y, parameters)
+            current_data = row[offset:offset + new_size]
+
+            param.data[:] = torch.reshape(torch.tensor(current_data), parameters)
+            offset += new_size
