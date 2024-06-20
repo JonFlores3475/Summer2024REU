@@ -316,7 +316,7 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
 
         # Server
         fed_method.sever_update(private_dataset.train_loaders)
-
+        print("test1")
         # If that arguments' task is 'OOD'
         if args.task == 'OOD':
             '''
@@ -362,35 +362,36 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
         # Else, if the arguments' task is NOT 'OOD'
             else:
             # If the 'mean_in_domain_acc_list' is in the locals and the arguments' task is "label_skew"
+                print("test2")
                 if 'mean_in_domain_acc_list' in locals() and args.task == 'label_skew':
-                    print("eval mean_in_domain_acc_list")
+                    print("eval mean_in_domain_acc_list -- test3")
                     # Gets the top1acc from the cal_top_one_five method, appending it to the mean_in_domain_acc_list
                     top1acc, _ = cal_top_one_five(fed_method.global_net, private_dataset.test_loader, fed_method.device)
                     mean_in_domain_acc_list.append(top1acc)
                     print(log_msg(f'The {epoch_index} Epoch: Acc:{top1acc}', "TEST"))
 
             # If the 'contribution_match_degree_list' is in locals and the federated method aggregation_weight_list is not none. . .
-                if 'contribution_match_degree_list' in locals() and fed_method.aggregation_weight_list is not None:
-                    print("eval contribution_match_degree_list")
-                    # Checks to see if the epoch index is divisible by 10, OR if the epoch index is one less than the communication_epoch
-                    if epoch_index % 10 == 0 or epoch_index == communication_epoch - 1:
-                        # If so, checks to see if the arguments' task is 'label_skew'. If so, sets the domain_list to None
-                        if args.task == 'label_skew':
-                            domain_list = None
-                        # Else, if the arguments' task is 'domain_skew, sets the domain_list to the private datasets' domain_list
-                        elif args.task == 'domain_skew':
-                            domain_list = private_dataset.domain_list
-                        # The con_fair_metric is set to the cal_sim_con_wright() method
-                        con_fair_metric = cal_sim_con_weight(optimizer=fed_method, test_loader=private_dataset.test_loader,
-                                                            domain_list=domain_list, task=args.task)
-                        # Appends the con_fair_metric to th contribution_match_degree_list
-                        contribution_match_degree_list.append(con_fair_metric)
-                    # If it isn't the case (line 361)
-                    else:
-                        # Sets the con_fair_metric to 0 and appends it to the contribution_match_degree_list
-                        con_fair_metric = 0
-                        contribution_match_degree_list.append(con_fair_metric)
-                    print(log_msg(f'The {epoch_index} Method: {args.method} Epoch: Con Fair:{con_fair_metric}', "TEST"))
+            if 'contribution_match_degree_list' in locals() and fed_method.aggregation_weight_list is not None:
+                print("eval contribution_match_degree_list")
+                # Checks to see if the epoch index is divisible by 10, OR if the epoch index is one less than the communication_epoch
+                if epoch_index % 10 == 0 or epoch_index == communication_epoch - 1:
+                    # If so, checks to see if the arguments' task is 'label_skew'. If so, sets the domain_list to None
+                    if args.task == 'label_skew':
+                        domain_list = None
+                    # Else, if the arguments' task is 'domain_skew, sets the domain_list to the private datasets' domain_list
+                    elif args.task == 'domain_skew':
+                        domain_list = private_dataset.domain_list
+                    # The con_fair_metric is set to the cal_sim_con_wright() method
+                    con_fair_metric = cal_sim_con_weight(optimizer=fed_method, test_loader=private_dataset.test_loader,
+                                                        domain_list=domain_list, task=args.task)
+                    # Appends the con_fair_metric to th contribution_match_degree_list
+                    contribution_match_degree_list.append(con_fair_metric)
+                # If it isn't the case (line 361)
+                else:
+                    # Sets the con_fair_metric to 0 and appends it to the contribution_match_degree_list
+                    con_fair_metric = 0
+                    contribution_match_degree_list.append(con_fair_metric)
+                print(log_msg(f'The {epoch_index} Method: {args.method} Epoch: Con Fair:{con_fair_metric}', "TEST"))
 
                 # If 'in_domain_accs_dict' is in the locals
                 if 'in_domain_accs_dict' in locals():
