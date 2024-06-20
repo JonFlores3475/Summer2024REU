@@ -1,11 +1,14 @@
 import copy
 
+import torch.utils.data as data_utils
 from Attack.byzantine.utils import attack_net_para
+from Attack.Poisoning_Attack.utils import inverse_loss
 from Methods.utils.meta_methods import FederatedMethod
 from utils.logger import CsvWriter
 import torch
 import numpy as np
 from utils.utils import log_msg
+from utils.utils import row_into_parameters
 
 # This function is calculating the top1acc and top5acc (unsure what acc could be, maybe account?). This happens
 # by the function getting the labels and finding the sum at a certain spot (so only 1 spot for the first one, and
@@ -293,7 +296,16 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
         # Client
         fed_method.test_loader = private_dataset.test_loader
         # Locally updates
-        fed_method.local_update(private_dataset.train_loaders)
+        if args.attack_type == "Poisoning_Attack":
+            train_loader = []
+            for k in range(len(private_dataset.train_loaders)):
+                convert, remove = next(iter(private_dataset.test_loader))
+                train, remove = next(iter(private_dataset.train_loaders[k]))
+                loss = inverse_loss(train, convert)
+                loss = row_into_parameters(loss, np.array(private_dataset.train_loaders[0]))
+                train_loader.append(data_utils.DataLoader(loss, batch_size=len(), shuffle=True))
+            fed_method.local_update(train_loader)
+
         fed_method.nets_list_before_agg = copy.deepcopy(fed_method.nets_list)
 
         # If the arguments' attack_type is 'byzantine', calls a method that creates the attack net parameters

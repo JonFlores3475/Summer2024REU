@@ -2,6 +2,7 @@ import numpy as np
 from Aggregations import Aggregation_NAMES
 from Attack.backdoor.utils import backdoor_attack
 from Attack.byzantine.utils import attack_dataset
+from Attack.Poisoning_Attack.utils import inverted_gradient
 from Datasets.federated_dataset.single_domain import single_domain_dataset_name, get_single_domain_dataset
 from Methods import Fed_Methods_NAMES, get_fed_method
 from utils.conf import set_random_seed, config_path
@@ -77,6 +78,10 @@ def parse_args():
     parser.add_argument('--backdoor_label', type=int, default=2, help='Which label to change (int)')
     parser.add_argument('--semantic_backdoor_label', type=int, default=3, help='Which label to change to (int)')
 
+    # Adds a flag for poisoning_evils, with its default value
+    parser.add_argument('--poisoning_evils', type=str, default='inverted_gradient', 
+                        help='Which type of Poisoning attack: inverted_gradient')
+    
     '''
     Federated Method: FedRC FedAVG FedR FedProx FedDyn FedOpt FedProc FedR FedProxRC  FedProxCos FedNTD  DelphiflMedian DelphiflZeroTrust
     '''
@@ -260,9 +265,23 @@ def main(args=None):
         backdoor_attack(args, particial_cfg, client_type, private_dataset, is_train=True)
         # Does another backdoor attack not during the training phase
         backdoor_attack(args, particial_cfg, client_type, private_dataset, is_train=False)
-    # Else, if the attack_type is 'inverted_loss'
-    elif args.attack_type == 'inverse_loss':
-        print()
+    elif args.attack_type == "inverted_loss":
+        # Gets the bad scale
+        bad_scale = int(particial_cfg.DATASET.parti_num * particial_cfg['attack'].bad_client_rate)
+        # Gets the good scale based off of the bas scale
+        good_scale = particial_cfg.DATASET.parti_num - bad_scale
+        # Gets the client type
+        client_type = np.repeat(True, good_scale).tolist() + (np.repeat(False, bad_scale)).tolist()
+        
+    elif args.attack_type == "inverted_gradient":
+        particial_cfg.attack.poisoning.evils = args.poisoning_evils
+        # Gets the bad scale
+        bad_scale = int(particial_cfg.DATASET.parti_num * particial_cfg['attack'].bad_client_rate)
+        # Gets the good scale based off of the bas scale
+        good_scale = particial_cfg.DATASET.parti_num - bad_scale
+        # Gets the client type
+        client_type = np.repeat(True, good_scale).tolist() + (np.repeat(False, bad_scale)).tolist()
+
     '''
     Loading the Private Backbone
     '''

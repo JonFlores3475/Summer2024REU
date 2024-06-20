@@ -13,21 +13,38 @@ class FedProxLocal(LocalMethod):
         super(FedProxLocal, self).__init__(args, cfg)
         self.mu = cfg.Local[self.NAME].mu
 
-    def loc_update(self, **kwargs):
+    # Local update, calls train_net
+    #
+    # kwargs - online_clients_list, nets_list, priloader_list, global_net
+    def loc_update(self, loss = -1, **kwargs):
+        # Simulated and randomized, local version of the online_clients list in meta_aggregation.py
         online_clients_list = kwargs['online_clients_list']
+        # Potential randomized neural network, local version of the nets_list in meta_aggregation.py
         nets_list = kwargs['nets_list']
+        # List, called as train_loader
         priloader_list = kwargs['priloader_list']
+        # Global neural network from nets_list
         global_net = kwargs['global_net']
         for i in online_clients_list:
-            self.train_net(i, nets_list[i], global_net, priloader_list[i])
+            self.train_net(i, nets_list[i], global_net, priloader_list[i], loss)
 
-    def train_net(self, index, net, global_net, train_loader):
+    # Trains the neural network
+    #
+    # index - the index of the online_clients_list
+    # net - specific net to be trained
+    # global_net - global version of the net
+    # train_loader - specific value in the priloader_list
+    def train_net(self, index, net, global_net, train_loader, loss = -1):
         net = net.to(self.device)
         net.train()
         if self.cfg.OPTIMIZER.type == 'SGD':
             optimizer = optim.SGD(net.parameters(), lr=self.cfg.OPTIMIZER.local_train_lr,
                                   momentum=self.cfg.OPTIMIZER.momentum, weight_decay=self.cfg.OPTIMIZER.weight_decay)
-        criterion = nn.CrossEntropyLoss()
+        if (loss == -1):
+            criterion = nn.CrossEntropyLoss()
+        else:
+            criterion = loss 
+        
         criterion.to(self.device)
         iterator = tqdm(range(self.cfg.OPTIMIZER.local_epoch))
         global_net = global_net.to(self.device)

@@ -1,8 +1,10 @@
+'''
 import copy
 
 import numpy as np
 import keras
 import torch
+import tensorflow as tf
 from torch.utils.data import DataLoader
 
 # --------------------------------
@@ -20,20 +22,97 @@ print("Derivative of expression with respect to x : {}".format(expr_diff))
 print("Value of the derivative : {}".format(expr_diff.doit()))
 # --------------------------------
 
+# --------------------------------
+# Sneaky randomness (attempt at hiding in Gaussian noise) (generally messing things up)
+# Found out that img may be the weights and not the image itself
+# These are all attempts at accomplishing roughly the same thing
+# Randomly shuffles the image, but only a percentage of them that are less than the noise rate
+def sneaky_random(img, noise_data_rate):
+    if torch.rand(1) < noise_data_rate:
+        img = img * (1 + torch.randn(img.size()))
+    return img
+
+# Randomly shuffles the image, but making sure that the amount shuffled is less than or equal to the noise rate
+def sneaky_random2(img, noise_data_rate):
+    randTensor = torch.randn(img.size())
+    for x in randTensor:
+        if x > noise_data_rate:
+            x = noise_data_rate
+    img = img * (1 + randTensor)
+    return img
+
+# Randomly shuffles the image and the target, but only a percentage of them that are less than the noise rate
+def sneaky_random3(img, target, noise_data_rate):
+    if torch.rand(1) < noise_data_rate:
+        img = img * (1 + torch.randn(img.size()))
+        target = int(torch.rand(1) * 10)
+    return img, target
+
+# Randomly shuffles the target, but only a percentage of them that are less than the noise rate
+def sneaky_random4(target, noise_data_rate):
+    if torch.rand(1) < noise_data_rate:
+        target = int(torch.rand(1) * 10)
+    return target
+
+# Randomly shuffles the image, with the amount shuffled being an addition rather than a multiplication
+# and actually shuffled how I wanted to do so last time. Probably less efficient
+# UNTESTED
+def sneaky_random5(img, noise_data_rate):
+    randTensor = torch.randn(img.size())
+    print(randTensor.shape)
+    width, height, depth = randTensor.shape
+    print(width)
+    print(height)
+    print(depth)
+    for x in range(width):
+        for y in range(height):
+            for z in range(depth):
+                if randTensor[x][y][z] > noise_data_rate:
+                    randTensor[x][y][z] = noise_data_rate
+    img = img + randTensor
+    return img
+
+# Generates Gaussian noise centered around 128 in the image given and randomly assigns a label
+# Likely does not work as is (may need to import PIL)
+# TODO: Check if 1 is the correct sigma and check if img.size works as intended (it should)
+def gaus_images(img, target):
+    img = img.effect_noise(img.size, 1)
+    target = int(torch.rand(1) * 10)
+    return img, target
+
+# Resizes the image twice so that it is more blurry than before and randomly assigns a label
+# Likely does not work as is (may need to import PIL)
+# TODO: Check if the resize is being used properly, if .size can be used as is, and whether NEAREST or BOX is better
+def shrink_stretch(img, target):
+    img = img.resize(img.size / 2, Resampling.NEAREST) # - most efficient but worst
+    img = img.resize(img.size * 2, Resampling.BOX) # - less efficient and second-worst
+    target = int(torch.rand(1) * 10)
+    return img, target
+# --------------------------------
+
 def inverse_loss(target, prediction):
-    loss = keras.categorical_crossentropy(target)
-    if loss < 0.001:
-        loss = 0.001
-    inv_loss = 1 / loss
+    loss = keras.losses.categorical_crossentropy(target, prediction)
+    inv_loss = torch.zeros(tuple(loss.shape))
+    start = 0
+    for i in range(loss.shape[0]):
+        for j in range(loss.shape[1]):
+            for k in range(loss.shape[2]):
+                start+=tf.get_static_value(loss[i,j,k])
+                if start < 0.001:
+                    inv_loss[i,j,k] = 1/0.001
+                else:
+                    inv_loss[i,j,k] = 1 / start
+                start = 0
     return inv_loss
 
 # Inverted Gradient Attack
 def inverted_gradient(args, cfg, client_type, private_dataset, is_train):
     num_nodes = cfg.attack.bad_client_rate * cfg.DATASET.parti_num # N
-    dataset = copy.deepcopy(private_dataset.train_loaders[client_index].dataset) # y^ ??
-    img, target = dataset.__getitem__(0) # xi and yi
-    cfg.attack.noise_data_rate # alpha
-    weight = lambda_vector.cpu().np() # w
+    y = copy.deepcopy(private_dataset.train_loaders) # y^ ??
+    y_hat = copy.deepcopy(private_dataset.out_train_loaders)
+    # img, target = dataset.__getitem__(0) # xi and yi
+    # cfg.attack.noise_data_rate # alpha
+    # weight = lambda_vector.cpu().np() # w
 
 
 # Base backdoor method is a more secure backdoor that is (potentially) used for more
@@ -178,3 +257,4 @@ class BackdoorDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         return self.data[index], self.labels[index]
+'''

@@ -2,6 +2,7 @@ import numpy as np
 from Aggregations import Aggregation_NAMES
 from Attack.backdoor.utils import backdoor_attack
 from Attack.byzantine.utils import attack_dataset
+from Attack.Poisoning_Attack.utils import inverted_gradient
 from Datasets.federated_dataset.single_domain import single_domain_dataset_name, get_single_domain_dataset
 from Methods import Fed_Methods_NAMES, get_fed_method
 from utils.conf import set_random_seed, config_path
@@ -55,14 +56,28 @@ def parse_args():
     '''
     Extra Attack Flags
     '''
-    # Adds flags for bad_client_rate, noise_data_rate, evils, backdoor_label, and semantic_backdoor_label, each having their
-    # own default value.
     parser.add_argument('--bad_client_rate', type=float, default=0.2, help='The ratio of bad clients')
     parser.add_argument('--noise_data_rate', type=float, default=0.5, help='Rate of noise')
-    parser.add_argument('--evils', type=str, default='base_backdoor', help='Which type of backdoor attack: base_backdoor or semantic_backdoor')
+
+    '''
+    Extra Byzantine Attack Flags
+    '''
+    # Adds a flag for byzantine_evils, with its default value
+    parser.add_argument('--byzantine_evils', type=str, default='PairFlip', 
+                        help='Which type of byzantine attack: PairFlip, SymFlip, RandomNoise, lie_attack, min_max, or min_sum')
+    
+    '''
+    Extra Backdoor Attack Flags
+    '''
+    # Adds flags for backdoor_evils, backdoor_label, and semantic_backdoor_label, each having their own default value.
+    parser.add_argument('--backdoor_evils', type=str, default='base_backdoor', help='Which type of backdoor attack: base_backdoor or semantic_backdoor')
     parser.add_argument('--backdoor_label', type=int, default=2, help='Which label to change (int)')
     parser.add_argument('--semantic_backdoor_label', type=int, default=3, help='Which label to change to (int)')
 
+    # Adds a flag for poisoning_evils, with its default value
+    parser.add_argument('--poisoning_evils', type=str, default='inverted_gradient', 
+                        help='Which type of Poisoning attack: inverted_gradient')
+    
     '''
     Federated Method: FedRC FedAVG FedR FedProx FedDyn FedOpt FedProc FedR FedProxRC  FedProxCos FedNTD  DelphiflMedian DelphiflZeroTrust
     '''
@@ -108,11 +123,6 @@ def main(args=None):
         args = parse_args()
     
     # TODO: Check that none of the arguments conflict or would be invalid
-    #print(args.bad_client_rate)
-    #print(args.noise_data_rate)
-    #print(args.evils)
-    #print(args.backdoor_label)
-    #print(args.semantic_backdoor_label)
 
     # Sets a bunch of the initial values of the arguments (timestamp, host, path, etc.)
     args.conf_jobnum = str(uuid.uuid4())
@@ -183,7 +193,6 @@ def main(args=None):
         private_dataset.get_data_loaders(client_domain_list)
         # Pops the first set of train_loaders off of the domain_list, setting that to the out_train_loader
         private_dataset.out_train_loader = private_dataset.train_loaders.pop()
-        # Pops the fist obejct from the client_domain_list
         client_domain_list.pop()
     # Else, if the arguments' task is 'label_skew'
     elif args.task == 'label_skew':
@@ -196,7 +205,6 @@ def main(args=None):
         client_domain_list = ini_client_domain(args.rand_domain_select, private_dataset.domain_list, particial_cfg.DATASET.parti_num)
         private_dataset.get_data_loaders(client_domain_list)
 
-    # If the attack_type is 'byzantine'
     if args.attack_type == 'byzantine':
         # Checks to see if the dataset is a multi_domain_dataset, setting it as so
         if args.dataset in multi_domain_dataset_name:
@@ -204,8 +212,7 @@ def main(args=None):
         # Else, if it is a single_domain_dataset, it sets it as so
         elif args.dataset in single_domain_dataset_name:
             particial_cfg.attack.dataset_type = 'single_domain'
-        
-        # Gets the bad scale, casting it as an integer
+
         bad_scale = int(particial_cfg.DATASET.parti_num * particial_cfg['attack'].bad_client_rate)
         # Gets the good scale based off of the bad scale
         good_scale = particial_cfg.DATASET.parti_num - bad_scale
@@ -238,6 +245,22 @@ def main(args=None):
         backdoor_attack(args, particial_cfg, client_type, private_dataset, is_train=True)
         # Does another backdoor attack not during the training phase
         backdoor_attack(args, particial_cfg, client_type, private_dataset, is_train=False)
+    elif args.attack_type == "inverted_loss":
+        # Gets the bad scale
+        bad_scale = int(particial_cfg.DATASET.parti_num * particial_cfg['attack'].bad_client_rate)
+        # Gets the good scale based off of the bas scale
+        good_scale = particial_cfg.DATASET.parti_num - bad_scale
+        # Gets the client type
+        client_type = np.repeat(True, good_scale).tolist() + (np.repeat(False, bad_scale)).tolist()
+        
+    elif args.attack_type == "inverted_gradient":
+        particial_cfg.attack.poisoning.evils = args.poisoning_evils
+        # Gets the bad scale
+        bad_scale = int(particial_cfg.DATASET.parti_num * particial_cfg['attack'].bad_client_rate)
+        # Gets the good scale based off of the bas scale
+        good_scale = particial_cfg.DATASET.parti_num - bad_scale
+        # Gets the client type
+        client_type = np.repeat(True, good_scale).tolist() + (np.repeat(False, bad_scale)).tolist()
 
     '''
     Loading the Private Backbone
