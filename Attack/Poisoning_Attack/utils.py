@@ -91,6 +91,7 @@ def shrink_stretch(img, target):
 
 def inverse_loss(target, prediction):
     loss = keras.losses.categorical_crossentropy(target, prediction)
+    print(loss)
     inv_loss = torch.zeros(tuple(loss.shape))
     start = 0
     for i in range(loss.shape[0]):
