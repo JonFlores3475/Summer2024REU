@@ -1,4 +1,5 @@
 import numpy as np
+from Methods.utils.meta_methods import FederatedMethod
 from Aggregations import Aggregation_NAMES
 from Attack.backdoor.utils import backdoor_attack
 from Attack.byzantine.utils import attack_dataset

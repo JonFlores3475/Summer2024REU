@@ -288,4 +288,3 @@ def attack_net_para(args, cfg, fed_method):
             if fed_method.client_type[i] == False:
                 sele_net = fed_method.nets_list[i]
                 row_into_parameters(mal_update.cpu().numpy(), sele_net.parameters())
-
