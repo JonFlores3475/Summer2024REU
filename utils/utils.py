@@ -117,8 +117,8 @@ def row_into_parameters(row, parameters):
     parameters = np.atleast_1d(parameters)
     offset = 0
     for param in parameters:
-        new_size = functools.reduce(lambda x, y: x * y, param.shape)
+        new_size = functools.reduce(lambda x, y: x * y, param)
         current_data = row[offset:offset + new_size]
 
-        param.data[:] = torch.reshape(torch.tensor(current_data), param.shape)
+        param.data[:] = torch.reshape(torch.tensor(current_data), param)
         offset += new_size
