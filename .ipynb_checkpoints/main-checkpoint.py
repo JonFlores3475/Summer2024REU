@@ -1,4 +1,5 @@
 import numpy as np
+from Methods.utils.meta_methods import FederatedMethod
 from Aggregations import Aggregation_NAMES
 from Attack.backdoor.utils import backdoor_attack
 from Attack.byzantine.utils import attack_dataset
@@ -56,15 +57,19 @@ def parse_args():
     '''
     Extra Attack Flags
     '''
+    # Adds general attack flags to be used for either byzantine or backdoor attacks
+    # bad_client_rate and noise_data_rate, each with its own default value
     parser.add_argument('--bad_client_rate', type=float, default=0.2, help='The ratio of bad clients')
     parser.add_argument('--noise_data_rate', type=float, default=0.5, help='Rate of noise')
 
     '''
     Extra Byzantine Attack Flags
     '''
-    # Adds a flag for byzantine_evils, with its default value
+    # Adds flags for byzantine_evils, dev_type, and lamda, each with its own default value
     parser.add_argument('--byzantine_evils', type=str, default='PairFlip', 
                         help='Which type of byzantine attack: PairFlip, SymFlip, RandomNoise, lie_attack, min_max, or min_sum')
+    parser.add_argument('--dev_type', type=str, default='std', help='Parameter for min_max and min_sum')
+    parser.add_argument('--lamda', type=float, default=10.0, help='Parameter for min_max and min_sum')
     
     '''
     Extra Backdoor Attack Flags
@@ -142,6 +147,29 @@ def main(args=None):
     # Creates the particial CfgNode using the arguments as settings
     particial_cfg = simplify_cfg(args, cfg)
 
+    # If there is an attack being carried out, set the bad_client_rate and noise_data_rate
+    if args.attack_type != 'None':
+        particial_cfg.attack.bad_client_rate = args.bad_client_rate
+        particial_cfg.attack.noise_data_rate = args.noise_data_rate
+        
+        if args.attack_type == 'byzantine':
+            '''
+            Updating Additional Attack Flags
+            '''
+            # Sets the particial_cfg's variables to the arguments' variables dev_type, and lamda,
+            particial_cfg.attack.byzantine.evils = args.byzantine_evils
+            particial_cfg.attack.byzantine.dev_type = args.dev_type
+            particial_cfg.attack.byzantine.dev_type = args.lamda
+        
+        elif args.attack_type == 'backdoor':
+            '''
+            Updating Additional Attack Flags
+            '''
+            # Sets the particial_cfg's variables to the arguments' variables
+            particial_cfg.attack.backdoor.evils = args.backdoor_evils
+            particial_cfg.attack.backdoor.backdoor_label = args.backdoor_label
+            particial_cfg.attack.backdoor.semantic_backdoor_label = args.semantic_backdoor_label
+
     # Prints the cfg to make sure all the information is correct
     show_cfg(args,particial_cfg,args.method)
     # If the seed is not none, it sets the random seed as the seed brought in through the arguements
@@ -193,6 +221,7 @@ def main(args=None):
         private_dataset.get_data_loaders(client_domain_list)
         # Pops the first set of train_loaders off of the domain_list, setting that to the out_train_loader
         private_dataset.out_train_loader = private_dataset.train_loaders.pop()
+        # Pops the fist object from the client_domain_list
         client_domain_list.pop()
     # Else, if the arguments' task is 'label_skew'
     elif args.task == 'label_skew':
@@ -205,6 +234,7 @@ def main(args=None):
         client_domain_list = ini_client_domain(args.rand_domain_select, private_dataset.domain_list, particial_cfg.DATASET.parti_num)
         private_dataset.get_data_loaders(client_domain_list)
 
+    # If the attack_type is 'byzantine'
     if args.attack_type == 'byzantine':
         # Checks to see if the dataset is a multi_domain_dataset, setting it as so
         if args.dataset in multi_domain_dataset_name:
@@ -212,7 +242,8 @@ def main(args=None):
         # Else, if it is a single_domain_dataset, it sets it as so
         elif args.dataset in single_domain_dataset_name:
             particial_cfg.attack.dataset_type = 'single_domain'
-
+        
+        # Gets the bad scale, casting it as an integer
         bad_scale = int(particial_cfg.DATASET.parti_num * particial_cfg['attack'].bad_client_rate)
         # Gets the good scale based off of the bad scale
         good_scale = particial_cfg.DATASET.parti_num - bad_scale
@@ -224,16 +255,6 @@ def main(args=None):
 
     # Else, if the attack_type is 'backdoor'
     elif args.attack_type == 'backdoor':
-        '''
-        Updating Additional Attack Flags
-        '''
-        # Sets the particial_cfg's variables to the arguments' variables
-        particial_cfg.attack.bad_client_rate = args.bad_client_rate
-        particial_cfg.attack.noise_data_rate = args.noise_data_rate
-        particial_cfg.attack.backdoor.evils = args.evils
-        particial_cfg.attack.backdoor.backdoor_label = args.backdoor_label
-        particial_cfg.attack.backdoor.semantic_backdoor_label = args.semantic_backdoor_label
-        
         # Gets the bad scale
         bad_scale = int(particial_cfg.DATASET.parti_num * particial_cfg['attack'].bad_client_rate)
         # Gets the good scale based off of the bas scale
