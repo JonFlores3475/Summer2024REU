@@ -361,17 +361,17 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
                 # Prints a log message
                 print(log_msg(f"The {epoch_index} Epoch: Out Domain {cfg[args.task].out_domain} Acc: {out_domain_acc} Method: {args.method} CSV: {args.csv_name}", "OOD"))
         # Else, if the arguments' task is NOT 'OOD'
-            else:
-            # If the 'mean_in_domain_acc_list' is in the locals and the arguments' task is "label_skew"
-                print("test2")
-                if 'mean_in_domain_acc_list' in locals() and args.task == 'label_skew':
-                    print("eval mean_in_domain_acc_list -- test3")
-                    # Gets the top1acc from the cal_top_one_five method, appending it to the mean_in_domain_acc_list
-                    top1acc, _ = cal_top_one_five(fed_method.global_net, private_dataset.test_loader, fed_method.device)
-                    mean_in_domain_acc_list.append(top1acc)
-                    print(log_msg(f'The {epoch_index} Epoch: Acc:{top1acc}', "TEST"))
+        else:
+        # If the 'mean_in_domain_acc_list' is in the locals and the arguments' task is "label_skew"
+            print("test2")
+            if 'mean_in_domain_acc_list' in locals() and args.task == 'label_skew':
+                print("eval mean_in_domain_acc_list -- test3")
+                # Gets the top1acc from the cal_top_one_five method, appending it to the mean_in_domain_acc_list
+                top1acc, _ = cal_top_one_five(fed_method.global_net, private_dataset.test_loader, fed_method.device)
+                mean_in_domain_acc_list.append(top1acc)
+                print(log_msg(f'The {epoch_index} Epoch: Acc:{top1acc}', "TEST"))
 
-            # If the 'contribution_match_degree_list' is in locals and the federated method aggregation_weight_list is not none. . .
+        # If the 'contribution_match_degree_list' is in locals and the federated method aggregation_weight_list is not none. . .
             if 'contribution_match_degree_list' in locals() and fed_method.aggregation_weight_list is not None:
                 print("eval contribution_match_degree_list")
                 # Checks to see if the epoch index is divisible by 10, OR if the epoch index is one less than the communication_epoch
