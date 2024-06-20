@@ -360,66 +360,66 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
                 # Prints a log message
                 print(log_msg(f"The {epoch_index} Epoch: Out Domain {cfg[args.task].out_domain} Acc: {out_domain_acc} Method: {args.method} CSV: {args.csv_name}", "OOD"))
         # Else, if the arguments' task is NOT 'OOD'
-        else:
+            else:
             # If the 'mean_in_domain_acc_list' is in the locals and the arguments' task is "label_skew"
-            if 'mean_in_domain_acc_list' in locals() and args.task == 'label_skew':
-                print("eval mean_in_domain_acc_list")
-                # Gets the top1acc from the cal_top_one_five method, appending it to the mean_in_domain_acc_list
-                top1acc, _ = cal_top_one_five(fed_method.global_net, private_dataset.test_loader, fed_method.device)
-                mean_in_domain_acc_list.append(top1acc)
-                print(log_msg(f'The {epoch_index} Epoch: Acc:{top1acc}', "TEST"))
+                if 'mean_in_domain_acc_list' in locals() and args.task == 'label_skew':
+                    print("eval mean_in_domain_acc_list")
+                    # Gets the top1acc from the cal_top_one_five method, appending it to the mean_in_domain_acc_list
+                    top1acc, _ = cal_top_one_five(fed_method.global_net, private_dataset.test_loader, fed_method.device)
+                    mean_in_domain_acc_list.append(top1acc)
+                    print(log_msg(f'The {epoch_index} Epoch: Acc:{top1acc}', "TEST"))
 
             # If the 'contribution_match_degree_list' is in locals and the federated method aggregation_weight_list is not none. . .
-            if 'contribution_match_degree_list' in locals() and fed_method.aggregation_weight_list is not None:
-                print("eval contribution_match_degree_list")
-                # Checks to see if the epoch index is divisible by 10, OR if the epoch index is one less than the communication_epoch
-                if epoch_index % 10 == 0 or epoch_index == communication_epoch - 1:
-                    # If so, checks to see if the arguments' task is 'label_skew'. If so, sets the domain_list to None
-                    if args.task == 'label_skew':
-                        domain_list = None
-                    # Else, if the arguments' task is 'domain_skew, sets the domain_list to the private datasets' domain_list
-                    elif args.task == 'domain_skew':
-                        domain_list = private_dataset.domain_list
-                    # The con_fair_metric is set to the cal_sim_con_wright() method
-                    con_fair_metric = cal_sim_con_weight(optimizer=fed_method, test_loader=private_dataset.test_loader,
-                                                         domain_list=domain_list, task=args.task)
-                    # Appends the con_fair_metric to th contribution_match_degree_list
-                    contribution_match_degree_list.append(con_fair_metric)
-                # If it isn't the case (line 361)
-                else:
-                    # Sets the con_fair_metric to 0 and appends it to the contribution_match_degree_list
-                    con_fair_metric = 0
-                    contribution_match_degree_list.append(con_fair_metric)
-                print(log_msg(f'The {epoch_index} Method: {args.method} Epoch: Con Fair:{con_fair_metric}', "TEST"))
-
-            # If 'in_domain_accs_dict' is in the locals
-            if 'in_domain_accs_dict' in locals():
-                print("eval in_domain_accs_dict")
-                # Sets the domain_accs and the mean_in_domain_acc to the values returned by the global_in_evaluation()
-                domain_accs, mean_in_domain_acc = global_in_evaluation(fed_method, private_dataset.test_loader, private_dataset.domain_list)
-                # Sets the performance variable and appends it to the performance_variane_list
-                perf_var = np.var(domain_accs, ddof=0)
-                performance_variane_list.append(perf_var)
-                mean_in_domain_acc_list.append(mean_in_domain_acc)
-
-                # For the index and the in_domain inside the private_datasets domain_list
-                for index, in_domain in enumerate(private_dataset.domain_list):
-                    # If the in_domain is in the in_domain_accs_dict, it appends the domain_accs at a certain index to the
-                    # in_domain_accs_dict at the in_domain key
-                    if in_domain in in_domain_accs_dict:
-                        in_domain_accs_dict[in_domain].append(domain_accs[index])
-                    # If not, then it sets it instead of appending it
+                if 'contribution_match_degree_list' in locals() and fed_method.aggregation_weight_list is not None:
+                    print("eval contribution_match_degree_list")
+                    # Checks to see if the epoch index is divisible by 10, OR if the epoch index is one less than the communication_epoch
+                    if epoch_index % 10 == 0 or epoch_index == communication_epoch - 1:
+                        # If so, checks to see if the arguments' task is 'label_skew'. If so, sets the domain_list to None
+                        if args.task == 'label_skew':
+                            domain_list = None
+                        # Else, if the arguments' task is 'domain_skew, sets the domain_list to the private datasets' domain_list
+                        elif args.task == 'domain_skew':
+                            domain_list = private_dataset.domain_list
+                        # The con_fair_metric is set to the cal_sim_con_wright() method
+                        con_fair_metric = cal_sim_con_weight(optimizer=fed_method, test_loader=private_dataset.test_loader,
+                                                            domain_list=domain_list, task=args.task)
+                        # Appends the con_fair_metric to th contribution_match_degree_list
+                        contribution_match_degree_list.append(con_fair_metric)
+                    # If it isn't the case (line 361)
                     else:
-                        in_domain_accs_dict[in_domain] = [domain_accs[index]]
-                print(log_msg(f"The {epoch_index} Epoch: Mean Acc: {mean_in_domain_acc} Method: {args.method} Per Var: {perf_var} ", "TEST"))
+                        # Sets the con_fair_metric to 0 and appends it to the contribution_match_degree_list
+                        con_fair_metric = 0
+                        contribution_match_degree_list.append(con_fair_metric)
+                    print(log_msg(f'The {epoch_index} Method: {args.method} Epoch: Con Fair:{con_fair_metric}', "TEST"))
 
-            # If 'attack_success_rate is in locals
-            if 'attack_success_rate' in locals():
-                # Gets the top1acc from the cal_top_one_five()
-                top1acc, _ = cal_top_one_five(fed_method.global_net, private_dataset.backdoor_test_loader, fed_method.device)
-                # Appends the top1acc to the attack_success_rate
-                attack_success_rate.append(top1acc)
-                print(log_msg(f'The {epoch_index} Epoch: attack success rate:{top1acc}'))
+                # If 'in_domain_accs_dict' is in the locals
+                if 'in_domain_accs_dict' in locals():
+                    print("eval in_domain_accs_dict")
+                    # Sets the domain_accs and the mean_in_domain_acc to the values returned by the global_in_evaluation()
+                    domain_accs, mean_in_domain_acc = global_in_evaluation(fed_method, private_dataset.test_loader, private_dataset.domain_list)
+                    # Sets the performance variable and appends it to the performance_variane_list
+                    perf_var = np.var(domain_accs, ddof=0)
+                    performance_variane_list.append(perf_var)
+                    mean_in_domain_acc_list.append(mean_in_domain_acc)
+
+                    # For the index and the in_domain inside the private_datasets domain_list
+                    for index, in_domain in enumerate(private_dataset.domain_list):
+                        # If the in_domain is in the in_domain_accs_dict, it appends the domain_accs at a certain index to the
+                        # in_domain_accs_dict at the in_domain key
+                        if in_domain in in_domain_accs_dict:
+                            in_domain_accs_dict[in_domain].append(domain_accs[index])
+                        # If not, then it sets it instead of appending it
+                        else:
+                            in_domain_accs_dict[in_domain] = [domain_accs[index]]
+                    print(log_msg(f"The {epoch_index} Epoch: Mean Acc: {mean_in_domain_acc} Method: {args.method} Per Var: {perf_var} ", "TEST"))
+
+                # If 'attack_success_rate is in locals
+                if 'attack_success_rate' in locals():
+                    # Gets the top1acc from the cal_top_one_five()
+                    top1acc, _ = cal_top_one_five(fed_method.global_net, private_dataset.backdoor_test_loader, fed_method.device)
+                    # Appends the top1acc to the attack_success_rate
+                    attack_success_rate.append(top1acc)
+                    print(log_msg(f'The {epoch_index} Epoch: attack success rate:{top1acc}'))
 
     # If we are logging to a csv_file
     if args.csv_log:
