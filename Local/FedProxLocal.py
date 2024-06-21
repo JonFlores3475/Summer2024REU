@@ -40,11 +40,7 @@ class FedProxLocal(LocalMethod):
         if self.cfg.OPTIMIZER.type == 'SGD':
             optimizer = optim.SGD(net.parameters(), lr=self.cfg.OPTIMIZER.local_train_lr,
                                   momentum=self.cfg.OPTIMIZER.momentum, weight_decay=self.cfg.OPTIMIZER.weight_decay)
-        if initial_loss == -1:
-            criterion = nn.CrossEntropyLoss()
-        else:
-            criterion = initial_loss 
-            criterion = torch.tensor(criterion)
+        criterion = nn.CrossEntropyLoss()
         
         criterion.to(self.device)
         iterator = tqdm(range(self.cfg.OPTIMIZER.local_epoch))
@@ -56,7 +52,10 @@ class FedProxLocal(LocalMethod):
                 images = images.to(self.device)
                 labels = labels.to(self.device)
                 outputs = net(images)
-                loss = criterion(outputs, labels)
+                if initial_loss == -1:
+                    loss = criterion(outputs, labels)
+                else:
+                    loss = initial_loss
                 fed_prox_reg = 0.0
                 for param_index, param in enumerate(net.parameters()):
                     fed_prox_reg += ((0.01 / 2) * torch.norm((param - global_weight_collector[param_index])) ** 2)
