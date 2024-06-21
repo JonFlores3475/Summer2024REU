@@ -44,23 +44,24 @@ class FedProxLocal(LocalMethod):
             criterion = nn.CrossEntropyLoss()
         else:
             criterion = initial_loss 
+            criterion = torch.tensor(criterion)
         
-            criterion.to(self.device)
-            iterator = tqdm(range(self.cfg.OPTIMIZER.local_epoch))
-            global_net = global_net.to(self.device)
-            global_weight_collector = list(global_net.parameters())
-            # criterion = criterion.numpy()
-            for _ in iterator:
-                for batch_idx, (images, labels) in enumerate(train_loader):
-                    images = images.to(self.device)
-                    labels = labels.to(self.device)
-                    outputs = net(images)
-                    loss = criterion(outputs, labels)
-                    fed_prox_reg = 0.0
-                    for param_index, param in enumerate(net.parameters()):
-                        fed_prox_reg += ((0.01 / 2) * torch.norm((param - global_weight_collector[param_index])) ** 2)
-                    loss += self.mu * fed_prox_reg
-                    optimizer.zero_grad()
-                    loss.backward()
-                    iterator.desc = "Local Participant %d loss = %0.3f" % (index, loss)
-                    optimizer.step()
+        criterion.to(self.device)
+        iterator = tqdm(range(self.cfg.OPTIMIZER.local_epoch))
+        global_net = global_net.to(self.device)
+        global_weight_collector = list(global_net.parameters())
+        # criterion = criterion.numpy()
+        for _ in iterator:
+            for batch_idx, (images, labels) in enumerate(train_loader):
+                images = images.to(self.device)
+                labels = labels.to(self.device)
+                outputs = net(images)
+                loss = criterion(outputs, labels)
+                fed_prox_reg = 0.0
+                for param_index, param in enumerate(net.parameters()):
+                    fed_prox_reg += ((0.01 / 2) * torch.norm((param - global_weight_collector[param_index])) ** 2)
+                loss += self.mu * fed_prox_reg
+                optimizer.zero_grad()
+                loss.backward()
+                iterator.desc = "Local Participant %d loss = %0.3f" % (index, loss)
+                optimizer.step()
