@@ -49,7 +49,7 @@ class FedProxLocal(LocalMethod):
         # criterion = criterion.numpy()
         for _ in iterator:
             for batch_idx, (images, labels) in enumerate(train_loader):
-                for loss_idx in range(initial_losses):
+                for loss_idx in len(initial_losses):
                     images = images.to(self.device)
                     labels = labels.to(self.device)
                     outputs = net(images)
