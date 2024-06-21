@@ -53,6 +53,15 @@ def sneaky_random5(img, noise_data_rate):
     img = img + randTensor
     return img
 
+# Shuffles a percentage of images that are less than the noise rate and have the correct target
+# Additionally, sets the target to another specific target
+def sneaky_backdoor(cfg, img, target, noise_data_rate):
+    if torch.rand(1) < noise_data_rate:
+        if target == cfg.attack.backdoor.semantic_backdoor_label:
+            target = cfg.attack.backdoor.backdoor_label
+            img = img * (1 + torch.randn(img.size()))
+    return img, target
+
 # Generates Gaussian noise centered around 128 in the image given and randomly assigns a label
 # Likely does not work as is (may need to import PIL)
 # TODO: Check if 1 is the correct sigma and check if img.size works as intended (it should)
@@ -153,6 +162,8 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
                         target = sneaky_random4(copy.deepcopy(target), noise_data_rate)
                     elif cfg.attack.backdoor.evils == 'sneaky_random5':
                         img = sneaky_random5(copy.deepcopy(img), noise_data_rate)
+                    elif cfg.attack.backdoor.evils == 'sneaky_backdoor':
+                        img, target = sneaky_backdoor(cfg, copy.deepcopy(img), copy.deepcopy(target), noise_data_rate)
                     elif cfg.attack.backdoor.evils == 'gaus_images':
                         img, target = gaus_images(copy.deepcopy(img), copy.deepcopy(target))
                     elif cfg.attack.backdoor.evils == 'shrink_stretch':
@@ -224,6 +235,10 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
                     all_imgs.append(img.numpy())
                 elif cfg.attack.backdoor.evils == 'sneaky_random5':
                     img = sneaky_random5(copy.deepcopy(img), noise_data_rate)
+                    all_targets.append(target)
+                    all_imgs.append(img.numpy())
+                elif cfg.attack.backdoor.evils == 'sneaky_backdoor':
+                    img, target = sneaky_backdoor(cfg, copy.deepcopy(img), copy.deepcopy(target), noise_data_rate)
                     all_targets.append(target)
                     all_imgs.append(img.numpy())
                 elif cfg.attack.backdoor.evils == 'gaus_images':
