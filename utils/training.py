@@ -291,6 +291,7 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
     # For each epoch in the communication_epoch range
     for epoch_index in range(communication_epoch):
         # Set the federated methods variables
+        loss = 0
         fed_method.epoch_index = epoch_index
 
         # Client
@@ -298,9 +299,10 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
         # Locally updates
         if args.attack_type == "Poisoning_Attack":
             train_loader = []
-            convert, remove = next(iter(private_dataset.test_loader))
-            train, remove = next(iter(private_dataset.train_loaders[k]))
-            loss = inverse_loss(train, convert)
+            for k in range(len(private_dataset.train_loaders)):
+                convert, remove = next(iter(private_dataset.test_loader))
+                train, remove = next(iter(private_dataset.train_loaders[k]))
+                loss = inverse_loss(train, convert)
                 # row_into_parameters(loss, np.array(private_dataset.train_loaders[0]))
                 # train_loader.append(data_utils.DataLoader(loss, batch_size=len(private_dataset.train_loaders[0]), shuffle=True))
             fed_method.local_update(private_dataset.train_loaders, loss)
