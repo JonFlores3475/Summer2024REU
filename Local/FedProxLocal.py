@@ -16,7 +16,7 @@ class FedProxLocal(LocalMethod):
     # Local update, calls train_net
     #
     # kwargs - online_clients_list, nets_list, priloader_list, global_net
-    def loc_update(self, loss = -1, **kwargs):
+    def loc_update(self, loss, **kwargs):
         # Simulated and randomized, local version of the online_clients list in meta_aggregation.py
         online_clients_list = kwargs['online_clients_list']
         # Potential randomized neural network, local version of the nets_list in meta_aggregation.py
@@ -34,13 +34,13 @@ class FedProxLocal(LocalMethod):
     # net - specific net to be trained
     # global_net - global version of the net
     # train_loader - specific value in the priloader_list
-    def train_net(self, index, net, global_net, train_loader, loss = -1):
+    def train_net(self, index, net, global_net, train_loader, loss = torch.zeros(1, 1)):
         net = net.to(self.device)
         net.train()
         if self.cfg.OPTIMIZER.type == 'SGD':
             optimizer = optim.SGD(net.parameters(), lr=self.cfg.OPTIMIZER.local_train_lr,
                                   momentum=self.cfg.OPTIMIZER.momentum, weight_decay=self.cfg.OPTIMIZER.weight_decay)
-        if loss == -1:
+        if loss[0] == 0:
             criterion = nn.CrossEntropyLoss()
         else:
             criterion = loss 
