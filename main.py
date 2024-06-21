@@ -284,6 +284,7 @@ def main(args=None):
         good_scale = particial_cfg.DATASET.parti_num - bad_scale
         # Gets the client type
         client_type = np.repeat(True, good_scale).tolist() + (np.repeat(False, bad_scale)).tolist()
+        print(client_type)
 
 
     '''
