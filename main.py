@@ -267,16 +267,7 @@ def main(args=None):
         backdoor_attack(args, particial_cfg, client_type, private_dataset, is_train=True)
         # Does another backdoor attack not during the training phase
         backdoor_attack(args, particial_cfg, client_type, private_dataset, is_train=False)
-    elif args.attack_type == "inverted_loss":
-        # Gets the bad scale
-        bad_scale = int(particial_cfg.DATASET.parti_num * particial_cfg['attack'].bad_client_rate)
-        # Gets the good scale based off of the bas scale
-        good_scale = particial_cfg.DATASET.parti_num - bad_scale
-        # Gets the client type
-        client_type = np.repeat(True, good_scale).tolist() + (np.repeat(False, bad_scale)).tolist()
-
-        
-    elif args.attack_type == "inverted_gradient":
+    elif args.attack_type == "Poisoning_Attack":
         particial_cfg.attack.poisoning.evils = args.poisoning_evils
         # Gets the bad scale
         bad_scale = int(particial_cfg.DATASET.parti_num * particial_cfg['attack'].bad_client_rate)
