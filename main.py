@@ -123,7 +123,7 @@ def parse_args():
 #
 # args - the arguments being passed in
 def main(args=None):
-    client_type = np.array()
+    client_type = np.array([False])
     # If the args are none, then parse the arguments
     if args is None:
         args = parse_args()
