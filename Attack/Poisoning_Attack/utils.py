@@ -93,17 +93,21 @@ def inverse_loss(target, prediction):
     criterion = torch.nn.CrossEntropyLoss()
     loss = criterion(target, prediction)
     print(loss)
-    inv_loss = torch.zeros(tuple(loss.shape))
-    start = 0
-    for i in range(loss.shape[0]):
-        for j in range(loss.shape[1]):
-            for k in range(loss.shape[2]):
-                start+=tf.get_static_value(loss[i,j,k])
-                if start < 0.001:
-                    inv_loss[i,j,k] = 1/0.001
-                else:
-                    inv_loss[i,j,k] = 1 / start
-                start = 0
+    inv_loss = 0
+    if loss < 0.001:
+        loss.item = 0.001
+    inv_loss = 1 / loss.item()
+    # inv_loss = torch.zeros(tuple(loss.shape))
+    # start = 0
+    # for i in range(loss.shape[0]):
+    #     for j in range(loss.shape[1]):
+    #         for k in range(loss.shape[2]):
+    #             start+=tf.get_static_value(loss[i,j,k])
+    #             if start < 0.001:
+    #                 inv_loss[i,j,k] = 1/0.001
+    #             else:
+    #                 inv_loss[i,j,k] = 1 / start
+    #             start = 0
     return inv_loss
 
 # Inverted Gradient Attack
