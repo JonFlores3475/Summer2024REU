@@ -291,7 +291,7 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list, client_typ
     # For each epoch in the communication_epoch range
     for epoch_index in range(communication_epoch):
         # Set the federated methods variables
-        loss = 0
+        loss = -1
         fed_method.epoch_index = epoch_index
 
         # Client
@@ -303,6 +303,8 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list, client_typ
                     convert, remove = next(iter(private_dataset.test_loader))
                     train, remove = next(iter(private_dataset.train_loaders[epoch_index]))
                     loss = inverse_loss(train, convert)
+                else:
+                    loss = -1
             fed_method.local_update(private_dataset.train_loaders, loss)
                 # row_into_parameters(loss, np.array(private_dataset.train_loaders[0]))
                 # train_loader.append(data_utils.DataLoader(loss, batch_size=len(private_dataset.train_loaders[0]), shuffle=True))
