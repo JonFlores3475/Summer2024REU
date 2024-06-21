@@ -268,7 +268,7 @@ def main(args=None):
         # Does another backdoor attack not during the training phase
         backdoor_attack(args, particial_cfg, client_type, private_dataset, is_train=False)
     elif args.attack_type == "Poisoning_Attack":
-        particial_cfg.Poisoning_Attack.evils = args.poisoning_evils
+        particial_cfg.attack.Poisoning_Attack.evils = args.poisoning_evils
         # Gets the bad scale
         bad_scale = int(particial_cfg.DATASET.parti_num * particial_cfg['attack'].bad_client_rate)
         # Gets the good scale based off of the bas scale
