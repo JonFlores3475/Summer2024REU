@@ -34,13 +34,13 @@ class FedProxLocal(LocalMethod):
     # net - specific net to be trained
     # global_net - global version of the net
     # train_loader - specific value in the priloader_list
-    def train_net(self, index, net, global_net, train_loader, initial_loss = torch.tensor([0])):
+    def train_net(self, index, net, global_net, train_loader, initial_loss = -1):
         net = net.to(self.device)
         net.train()
         if self.cfg.OPTIMIZER.type == 'SGD':
             optimizer = optim.SGD(net.parameters(), lr=self.cfg.OPTIMIZER.local_train_lr,
                                   momentum=self.cfg.OPTIMIZER.momentum, weight_decay=self.cfg.OPTIMIZER.weight_decay)
-        if initial_loss.size(dim=0) == 1:
+        if initial_loss == -1:
             criterion = nn.CrossEntropyLoss()
         else:
             criterion = initial_loss 
