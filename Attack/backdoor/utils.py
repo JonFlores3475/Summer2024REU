@@ -37,20 +37,19 @@ def sneaky_random4(target, noise_data_rate):
     return target
 
 # Randomly shuffles the image, with the amount shuffled being an addition rather than a multiplication
-# and actually shuffled how I wanted to do so last time. Probably less efficient
 # UNTESTED
 def sneaky_random5(img, noise_data_rate):
-    randTensor = torch.randn(img.size())
+    randTensor = torch.randn(img.size()) * noise_data_rate
     ##print(randTensor.shape)
-    width, height, depth = randTensor.shape
+    #width, height, depth = randTensor.shape
     ##print(width)
     ##print(height)
     ##print(depth)
-    for x in range(width):
-        for y in range(height):
-            for z in range(depth):
-                if randTensor[x][y][z] > noise_data_rate:
-                    randTensor[x][y][z] = noise_data_rate
+#for x in range(width):
+ #       for y in range(height):
+  #          for z in range(depth):
+   #             if randTensor[x][y][z] > noise_data_rate:
+    #                randTensor[x][y][z] = noise_data_rate
     img = img + randTensor
     return img
 
