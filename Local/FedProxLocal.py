@@ -34,7 +34,7 @@ class FedProxLocal(LocalMethod):
     # net - specific net to be trained
     # global_net - global version of the net
     # train_loader - specific value in the priloader_list
-    def train_net(self, index, net, global_net, train_loader, initial_losses):
+    def train_net(self, index, net, global_net, train_loader, initial_losses = []):
         net = net.to(self.device)
         net.train()
         if self.cfg.OPTIMIZER.type == 'SGD':
@@ -49,14 +49,11 @@ class FedProxLocal(LocalMethod):
         # criterion = criterion.numpy()
         for _ in iterator:
             for batch_idx, (images, labels) in enumerate(train_loader):
-                for loss_idx in len(initial_losses):
+                if (len(initial_losses) == 0):
                     images = images.to(self.device)
                     labels = labels.to(self.device)
                     outputs = net(images)
-                    if initial_losses[loss_idx] == -1:
-                        loss = criterion(outputs, labels)
-                    else:
-                        loss = initial_losses[loss_idx]
+                    loss = criterion(outputs, labels)
                     fed_prox_reg = 0.0
                     for param_index, param in enumerate(net.parameters()):
                         fed_prox_reg += ((0.01 / 2) * torch.norm((param - global_weight_collector[param_index])) ** 2)
@@ -65,3 +62,20 @@ class FedProxLocal(LocalMethod):
                     loss.backward()
                     iterator.desc = "Local Participant %d loss = %0.3f" % (index, loss)
                     optimizer.step()
+                else:
+                    for loss_idx in len(initial_losses):
+                        images = images.to(self.device)
+                        labels = labels.to(self.device)
+                        outputs = net(images)
+                        if initial_losses[loss_idx] == -1:
+                            loss = criterion(outputs, labels)
+                        else:
+                            loss = initial_losses[loss_idx]
+                        fed_prox_reg = 0.0
+                        for param_index, param in enumerate(net.parameters()):
+                            fed_prox_reg += ((0.01 / 2) * torch.norm((param - global_weight_collector[param_index])) ** 2)
+                        loss += self.mu * fed_prox_reg
+                        optimizer.zero_grad()
+                        loss.backward()
+                        iterator.desc = "Local Participant %d loss = %0.3f" % (index, loss)
+                        optimizer.step()
