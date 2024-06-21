@@ -63,14 +63,13 @@ class FedProxLocal(LocalMethod):
                     iterator.desc = "Local Participant %d loss = %0.3f" % (index, loss)
                     optimizer.step()
                 else:
-                    for loss_idx in initial_losses:
                         images = images.to(self.device)
                         labels = labels.to(self.device)
                         outputs = net(images)
-                        if loss_idx == -1:
+                        if initial_losses[index] == -1:
                             loss = criterion(outputs, labels)
                         else:
-                            loss = loss_idx
+                            loss = initial_losses[index]
                         fed_prox_reg = 0.0
                         for param_index, param in enumerate(net.parameters()):
                             fed_prox_reg += ((0.01 / 2) * torch.norm((param - global_weight_collector[param_index])) ** 2)
