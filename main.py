@@ -250,6 +250,7 @@ def main(args=None):
         good_scale = particial_cfg.DATASET.parti_num - bad_scale
         # Gets the client type
         client_type = np.repeat(True, good_scale).tolist() + (np.repeat(False, bad_scale)).tolist()
+        print(type(client_type))
 
         # Uses the attack_dataset
         attack_dataset(args, particial_cfg, private_dataset, client_type)
