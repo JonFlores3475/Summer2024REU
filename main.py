@@ -123,7 +123,7 @@ def parse_args():
 #
 # args - the arguments being passed in
 def main(args=None):
-    client_type = 0
+    client_type = np.array()
     # If the args are none, then parse the arguments
     if args is None:
         args = parse_args()
@@ -274,7 +274,6 @@ def main(args=None):
         good_scale = particial_cfg.DATASET.parti_num - bad_scale
         # Gets the client type
         client_type = np.repeat(True, good_scale).tolist() + (np.repeat(False, bad_scale)).tolist()
-        print(type(client_type))
 
         
     elif args.attack_type == "inverted_gradient":
@@ -285,7 +284,6 @@ def main(args=None):
         good_scale = particial_cfg.DATASET.parti_num - bad_scale
         # Gets the client type
         client_type = np.repeat(True, good_scale).tolist() + (np.repeat(False, bad_scale)).tolist()
-        print(type(client_type))
 
 
     '''
