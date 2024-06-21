@@ -91,6 +91,7 @@ def shrink_stretch(img, target):
 
 def inverse_loss(target, prediction):
     loss = torch.nn.CrossEntropyLoss()
+    loss = torch.tensor(loss)
     inv_loss = torch.zeros(tuple(loss.shape))
     start = 0
     for i in range(loss.shape[0]):
