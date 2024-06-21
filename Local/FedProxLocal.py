@@ -63,18 +63,18 @@ class FedProxLocal(LocalMethod):
                     iterator.desc = "Local Participant %d loss = %0.3f" % (index, loss)
                     optimizer.step()
                 else:
-                        images = images.to(self.device)
-                        labels = labels.to(self.device)
-                        outputs = net(images)
-                        if initial_losses[index] == -1:
-                            loss = criterion(outputs, labels)
-                        else:
-                            loss = initial_losses[index]
-                        fed_prox_reg = 0.0
-                        for param_index, param in enumerate(net.parameters()):
-                            fed_prox_reg += ((0.01 / 2) * torch.norm((param - global_weight_collector[param_index])) ** 2)
-                        loss += self.mu * fed_prox_reg
-                        optimizer.zero_grad()
-                        loss.backward()
-                        iterator.desc = "Local Participant %d loss = %0.3f" % (index, loss)
-                        optimizer.step()
+                    images = images.to(self.device)
+                    labels = labels.to(self.device)
+                    outputs = net(images)
+                    if initial_losses[index] == -1:
+                        loss = criterion(outputs, labels)
+                    else:
+                        loss = initial_losses[index]
+                    fed_prox_reg = 0.0
+                    for param_index, param in enumerate(net.parameters()):
+                        fed_prox_reg += ((0.01 / 2) * torch.norm((param - global_weight_collector[param_index])) ** 2)
+                    loss += self.mu * fed_prox_reg
+                    optimizer.zero_grad()
+                    loss.backward()
+                    iterator.desc = "Local Participant %d loss = %0.3f" % (index, loss)
+                    optimizer.step()
