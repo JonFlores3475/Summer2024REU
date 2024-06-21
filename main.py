@@ -123,6 +123,7 @@ def parse_args():
 #
 # args - the arguments being passed in
 def main(args=None):
+    client_type = 0
     # If the args are none, then parse the arguments
     if args is None:
         args = parse_args()
@@ -316,7 +317,7 @@ def main(args=None):
         setproctitle.setproctitle('{}_{}_{}_{}'.format(args.method, args.task,args.dataset, args.csv_name))
     # It then trains the model based off of the fed_method, private_dataset, the arguments, the current particial_cfg,
     # and the client_domain_list
-    train(fed_method, private_dataset, args, particial_cfg, client_domain_list)
+    train(fed_method, private_dataset, args, particial_cfg, client_domain_list, client_type)
 
 # If the name of the file that was executed is '__main__', then it calls the main() method
 if __name__ == '__main__':
