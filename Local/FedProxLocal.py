@@ -34,7 +34,7 @@ class FedProxLocal(LocalMethod):
     # net - specific net to be trained
     # global_net - global version of the net
     # train_loader - specific value in the priloader_list
-    def train_net(self, index, net, global_net, train_loader, loss = torch.zeros(1, 1)):
+    def train_net(self, index, net, global_net, train_loader, loss = torch.tensor([0])):
         net = net.to(self.device)
         net.train()
         if self.cfg.OPTIMIZER.type == 'SGD':
