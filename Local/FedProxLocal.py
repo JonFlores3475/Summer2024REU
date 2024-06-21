@@ -44,6 +44,7 @@ class FedProxLocal(LocalMethod):
             criterion = nn.CrossEntropyLoss()
         else:
             criterion = initial_loss 
+            criterion.numpy()
         
         criterion.to(self.device)
         iterator = tqdm(range(self.cfg.OPTIMIZER.local_epoch))
