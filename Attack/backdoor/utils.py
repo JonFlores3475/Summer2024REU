@@ -41,11 +41,11 @@ def sneaky_random4(target, noise_data_rate):
 # UNTESTED
 def sneaky_random5(img, noise_data_rate):
     randTensor = torch.randn(img.size())
-    print(randTensor.shape)
+    ##print(randTensor.shape)
     width, height, depth = randTensor.shape
-    print(width)
-    print(height)
-    print(depth)
+    ##print(width)
+    ##print(height)
+    ##print(depth)
     for x in range(width):
         for y in range(height):
             for z in range(depth):

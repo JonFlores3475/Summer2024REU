@@ -51,4 +51,6 @@ yacs\
 yarl\
 dill\
 multiprocess\
+keras\
+tensorflow\
 ipykernel
