@@ -95,8 +95,8 @@ def inverse_loss(target, prediction):
     print(loss)
     inv_loss = 0
     if loss < 0.001:
-        loss.item = 0.001
-    inv_loss = 1 / loss.item()
+        loss = 0.001
+    inv_loss = 1 / loss
     # inv_loss = torch.zeros(tuple(loss.shape))
     # start = 0
     # for i in range(loss.shape[0]):
