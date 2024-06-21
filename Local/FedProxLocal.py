@@ -63,7 +63,7 @@ class FedProxLocal(LocalMethod):
                     iterator.desc = "Local Participant %d loss = %0.3f" % (index, loss)
                     optimizer.step()
                 else:
-                    for loss_idx in len(initial_losses):
+                    for loss_idx in initial_losses:
                         images = images.to(self.device)
                         labels = labels.to(self.device)
                         outputs = net(images)
