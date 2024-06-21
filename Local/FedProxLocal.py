@@ -34,7 +34,7 @@ class FedProxLocal(LocalMethod):
     # net - specific net to be trained
     # global_net - global version of the net
     # train_loader - specific value in the priloader_list
-    def train_net(self, index, net, global_net, train_loader, initial_loss = -1):
+    def train_net(self, index, net, global_net, train_loader, initial_losses):
         net = net.to(self.device)
         net.train()
         if self.cfg.OPTIMIZER.type == 'SGD':
@@ -52,10 +52,10 @@ class FedProxLocal(LocalMethod):
                 images = images.to(self.device)
                 labels = labels.to(self.device)
                 outputs = net(images)
-                if initial_loss == -1:
+                if initial_losses[batch_idx] == -1:
                     loss = criterion(outputs, labels)
                 else:
-                    loss = initial_loss
+                    loss = initial_losses[batch_idx]
                 fed_prox_reg = 0.0
                 for param_index, param in enumerate(net.parameters()):
                     fed_prox_reg += ((0.01 / 2) * torch.norm((param - global_weight_collector[param_index])) ** 2)
