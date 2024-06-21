@@ -301,7 +301,7 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list, client_typ
             for client_index in range(cfg.DATASET.parti_num):
                 if not client_type[client_index]:
                     convert, remove = next(iter(private_dataset.test_loader))
-                    train, remove = next(iter(private_dataset.train_loaders[epoch_index]))
+                    train, remove = next(iter(private_dataset.train_loaders[client_index]))
                     loss = inverse_loss(train, convert)
                     losses.append(loss)
                 else:
