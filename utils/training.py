@@ -253,7 +253,7 @@ def fill_blank(net_cls_counts,classes):
 # args - arguments coming from main (flags)
 # cfg - CfgNode being used (local model?)
 # client_domain_list - list of client indexes
-def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
+def train(fed_method, private_dataset, args, cfg, client_domain_list, client_type) -> None:
     # Checks to see if we are logging the steps, creating a CsvWriter if we are
     if args.csv_log:
         csv_writer = CsvWriter(args, cfg)
@@ -298,13 +298,16 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
         fed_method.test_loader = private_dataset.test_loader
         # Locally updates
         if args.attack_type == "Poisoning_Attack":
-            train_loader = []
-            convert, remove = next(iter(private_dataset.test_loader))
-            train, remove = next(iter(private_dataset.train_loaders[epoch_index]))
-            loss = inverse_loss(train, convert)
+            for client_index in range(cfg.DATASET.parti_num):
+                if not client_type[client_index]:
+                    convert, remove = next(iter(private_dataset.test_loader))
+                    train, remove = next(iter(private_dataset.train_loaders[epoch_index]))
+                    loss = inverse_loss(train, convert)
+                    fed_method.local_update(private_dataset.train_loaders, loss)
+                else:
+                    fed_method.local_update(private_dataset.train_loaders)
                 # row_into_parameters(loss, np.array(private_dataset.train_loaders[0]))
                 # train_loader.append(data_utils.DataLoader(loss, batch_size=len(private_dataset.train_loaders[0]), shuffle=True))
-            fed_method.local_update(private_dataset.train_loaders, loss)
         else:
             fed_method.local_update(private_dataset.train_loaders)
 
