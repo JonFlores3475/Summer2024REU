@@ -84,7 +84,7 @@ def parse_args():
                         help='Which type of Poisoning attack: inverted_gradient')
     
     '''
-    Federated Method: FedRC FedAVG FedR FedProx FedDyn FedOpt FedProc FedR FedProxRC  FedProxCos FedNTD  DelphiflMedian DelphiflZeroTrust
+    Federated Method: FedRC FedAVG FedR FedProx FedDyn FedOpt FedProc FedR FedProxRC  FedProxCos FedNTD  DelphiflMedian DelphiflZeroTrust DelphiflZeroTrustV2
     '''
     # Adds flag for the type of method the federated learning model is using, with qffeAVG being the default
     parser.add_argument('--method', type=str, default='qffeAVG',
@@ -123,6 +123,7 @@ def parse_args():
 #
 # args - the arguments being passed in
 def main(args=None):
+    client_type = np.array([True])
     # If the args are none, then parse the arguments
     if args is None:
         args = parse_args()
@@ -249,7 +250,7 @@ def main(args=None):
         good_scale = particial_cfg.DATASET.parti_num - bad_scale
         # Gets the client type
         client_type = np.repeat(True, good_scale).tolist() + (np.repeat(False, bad_scale)).tolist()
-
+    
         # Uses the attack_dataset
         attack_dataset(args, particial_cfg, private_dataset, client_type)
 
@@ -266,22 +267,16 @@ def main(args=None):
         backdoor_attack(args, particial_cfg, client_type, private_dataset, is_train=True)
         # Does another backdoor attack not during the training phase
         backdoor_attack(args, particial_cfg, client_type, private_dataset, is_train=False)
-    elif args.attack_type == "inverted_loss":
+    elif args.attack_type == "Poisoning_Attack":
+        particial_cfg.attack.Poisoning_Attack.evils = args.poisoning_evils
         # Gets the bad scale
         bad_scale = int(particial_cfg.DATASET.parti_num * particial_cfg['attack'].bad_client_rate)
         # Gets the good scale based off of the bas scale
         good_scale = particial_cfg.DATASET.parti_num - bad_scale
         # Gets the client type
         client_type = np.repeat(True, good_scale).tolist() + (np.repeat(False, bad_scale)).tolist()
-        
-    elif args.attack_type == "inverted_gradient":
-        particial_cfg.attack.poisoning.evils = args.poisoning_evils
-        # Gets the bad scale
-        bad_scale = int(particial_cfg.DATASET.parti_num * particial_cfg['attack'].bad_client_rate)
-        # Gets the good scale based off of the bas scale
-        good_scale = particial_cfg.DATASET.parti_num - bad_scale
-        # Gets the client type
-        client_type = np.repeat(True, good_scale).tolist() + (np.repeat(False, bad_scale)).tolist()
+        print(client_type)
+
 
     '''
     Loading the Private Backbone
@@ -316,7 +311,7 @@ def main(args=None):
         setproctitle.setproctitle('{}_{}_{}_{}'.format(args.method, args.task,args.dataset, args.csv_name))
     # It then trains the model based off of the fed_method, private_dataset, the arguments, the current particial_cfg,
     # and the client_domain_list
-    train(fed_method, private_dataset, args, particial_cfg, client_domain_list)
+    train(fed_method, private_dataset, args, particial_cfg, client_domain_list, client_type)
 
 # If the name of the file that was executed is '__main__', then it calls the main() method
 if __name__ == '__main__':
