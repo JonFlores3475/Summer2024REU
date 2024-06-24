@@ -152,6 +152,16 @@ CFG.Sever.DelphiflZeroTrustSever.pub_aug = 'weak'
 CFG.Sever.DelphiflZeroTrustSever.public_batch_size = 64
 CFG.Sever.DelphiflZeroTrustSever.public_epoch = 20
 
+CFG.Sever.DelphiflZeroTrustSeverV2 = CN()
+CFG.Sever.DelphiflZeroTrustSeverV2.public_dataset_name = 'pub_minst'
+CFG.Sever.DelphiflZeroTrustSeverV2.pub_len = 5000
+CFG.Sever.DelphiflZeroTrustSeverV2.pub_aug = 'weak'
+CFG.Sever.DelphiflZeroTrustSeverV2.public_batch_size = 64
+CFG.Sever.DelphiflZeroTrustSeverV2.public_epoch = 20
+CFG.Sever.DelphiflZeroTrustSeverV2.server_lr = 1.0
+CFG.Sever.DelphiflZeroTrustSeverV2.robustLR_threshold = 4.0
+
+
 CFG.Sever.SageFlowSever = CN()
 CFG.Sever.SageFlowSever.public_dataset_name = 'pub_minst'
 CFG.Sever.SageFlowSever.pub_len = 5000
@@ -299,6 +309,10 @@ CFG.DelphiflMedian.global_method = 'DelphiflMedianSever'
 CFG.DelphiflZeroTrust = CN()
 CFG.DelphiflZeroTrust.local_method = 'BaseLocal' #BaseLocal FedProxLocal
 CFG.DelphiflZeroTrust.global_method = 'DelphiflZeroTrustSever'
+
+CFG.DelphiflZeroTrustV2 = CN()
+CFG.DelphiflZeroTrustV2.local_method = 'BaseLocal' #BaseLocal FedProxLocal
+CFG.DelphiflZeroTrustV2.global_method = 'DelphiflZeroTrustSeverV2'
 
 # FedProx
 CFG.FedProx = CN()
