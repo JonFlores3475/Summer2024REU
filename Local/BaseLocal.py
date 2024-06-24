@@ -10,7 +10,7 @@ class BaseLocal(LocalMethod):
     def __init__(self, args, cfg):
         super(BaseLocal, self).__init__(args, cfg)
 
-    def loc_update(self, **kwargs):
+    def loc_update(self, loss, **kwargs):
         online_clients_list = kwargs['online_clients_list']
         nets_list = kwargs['nets_list']
         priloader_list = kwargs['priloader_list']

@@ -12,7 +12,10 @@ DATASET:
   train_eval_domain_ratio: 0.01
 DelphiflZeroTrust:
   global_method: DelphiflZeroTrustSever
-  local_method: BaseLocal
+  local_method: FedProxLocal
+Local:
+  FedProxLocal:
+    mu: 0.01
 OPTIMIZER:
   local_epoch: 10
   local_test_batch: 64
@@ -30,60 +33,10 @@ Sever:
     public_dataset_name: pub_minst
     public_epoch: 20
 attack:
-  backdoor:
-    backdoor_label: 2
-    evils: sneaky_backdoor
-    semantic_backdoor_label: 3
-    trigger_position:
-    - - 0
-      - 0
-      - 0
-    - - 0
-      - 0
-      - 1
-    - - 0
-      - 0
-      - 2
-    - - 0
-      - 0
-      - 4
-    - - 0
-      - 0
-      - 5
-    - - 0
-      - 0
-      - 6
-    - - 0
-      - 2
-      - 0
-    - - 0
-      - 2
-      - 1
-    - - 0
-      - 2
-      - 2
-    - - 0
-      - 2
-      - 4
-    - - 0
-      - 2
-      - 5
-    - - 0
-      - 2
-      - 6
-    trigger_value:
-    - 1
-    - 1
-    - 1
-    - 1
-    - 1
-    - 1
-    - 1
-    - 1
-    - 1
-    - 1
-    - 1
-    - 1
+  Poisoning_Attack:
+    bad_client_rate: 0.2
+    evils: inverted_gradient
+    noise_data_rate: 0.5
   bad_client_rate: 0.2
   noise_data_rate: 0.5
 label_skew: {}

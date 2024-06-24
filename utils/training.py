@@ -398,34 +398,32 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list, client_typ
                     contribution_match_degree_list.append(con_fair_metric)
                 print(log_msg(f'The {epoch_index} Method: {args.method} Epoch: Con Fair:{con_fair_metric}', "TEST"))
 
-                # If 'in_domain_accs_dict' is in the locals
-                if 'in_domain_accs_dict' in locals():
-                    print("eval in_domain_accs_dict")
-                    # Sets the domain_accs and the mean_in_domain_acc to the values returned by the global_in_evaluation()
-                    domain_accs, mean_in_domain_acc = global_in_evaluation(fed_method, private_dataset.test_loader, private_dataset.domain_list)
-                    # Sets the performance variable and appends it to the performance_variane_list
-                    perf_var = np.var(domain_accs, ddof=0)
-                    performance_variane_list.append(perf_var)
-                    mean_in_domain_acc_list.append(mean_in_domain_acc)
+            # If 'in_domain_accs_dict' is in the locals
+            if 'in_domain_accs_dict' in locals():
+                print("eval in_domain_accs_dict")
+                # Sets the domain_accs and the mean_in_domain_acc to the values returned by the global_in_evaluation()
+                domain_accs, mean_in_domain_acc = global_in_evaluation(fed_method, private_dataset.test_loader, private_dataset.domain_list)                    # Sets the performance variable and appends it to the performance_variane_list
+                perf_var = np.var(domain_accs, ddof=0)
+                performance_variane_list.append(perf_var)
+                mean_in_domain_acc_list.append(mean_in_domain_acc)
 
-                    # For the index and the in_domain inside the private_datasets domain_list
-                    for index, in_domain in enumerate(private_dataset.domain_list):
-                        # If the in_domain is in the in_domain_accs_dict, it appends the domain_accs at a certain index to the
-                        # in_domain_accs_dict at the in_domain key
-                        if in_domain in in_domain_accs_dict:
-                            in_domain_accs_dict[in_domain].append(domain_accs[index])
+                # For the index and the in_domain inside the private_datasets domain_list
+                for index, in_domain in enumerate(private_dataset.domain_list):
+                # If the in_domain is in the in_domain_accs_dict, it appends the domain_accs at a certain index to the                        # in_domain_accs_dict at the in_domain key
+                    if in_domain in in_domain_accs_dict:
+                        in_domain_accs_dict[in_domain].append(domain_accs[index])
                         # If not, then it sets it instead of appending it
-                        else:
-                            in_domain_accs_dict[in_domain] = [domain_accs[index]]
+                    else:
+                        in_domain_accs_dict[in_domain] = [domain_accs[index]]
                     print(log_msg(f"The {epoch_index} Epoch: Mean Acc: {mean_in_domain_acc} Method: {args.method} Per Var: {perf_var} ", "TEST"))
 
-                # If 'attack_success_rate is in locals
-                if 'attack_success_rate' in locals():
-                    # Gets the top1acc from the cal_top_one_five()
-                    top1acc, _ = cal_top_one_five(fed_method.global_net, private_dataset.backdoor_test_loader, fed_method.device)
-                    # Appends the top1acc to the attack_success_rate
-                    attack_success_rate.append(top1acc)
-                    print(log_msg(f'The {epoch_index} Epoch: attack success rate:{top1acc}'))
+            # If 'attack_success_rate is in locals
+            if 'attack_success_rate' in locals():
+                # Gets the top1acc from the cal_top_one_five()
+                top1acc, _ = cal_top_one_five(fed_method.global_net, private_dataset.backdoor_test_loader, fed_method.device)
+                # Appends the top1acc to the attack_success_rate
+                attack_success_rate.append(top1acc)
+                print(log_msg(f'The {epoch_index} Epoch: attack success rate:{top1acc}'))
 
     # If we are logging to a csv_file
     if args.csv_log:
