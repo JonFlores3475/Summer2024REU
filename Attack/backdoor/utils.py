@@ -3,6 +3,9 @@ import copy
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
+import torchvision
+import torchvision.transforms as T
+from PIL import Image
 
 # --------------------------------
 # Sneaky randomness (attempt at hiding in Gaussian noise) (generally messing things up)
@@ -63,20 +66,35 @@ def sneaky_backdoor(cfg, img, target, noise_data_rate):
     return img, target
 
 # Generates Gaussian noise centered around 128 in the image given and randomly assigns a label
-# Likely does not work as is (may need to import PIL)
-# TODO: Check if 1 is the correct sigma and check if img.size works as intended (it should)
 def gaus_images(img, target):
-    img = img.effect_noise(img.size, 1)
+    # Transforming the img to an RGB Pillow image
+    to_img = T.ToPILImage(mode='RGB')
+    img = to_img(img)
+    # Creating a new image that is Gaussian noise and converting it to RGB
+    gaus_img = Image.effect_noise(img.size, 1)
+    gaus_img = gaus_img.convert(mode='RGB')
+    # Blending the two images half and half
+    img = Image.blend(img, gaus_img, 0.5) # 0.5 combines half of the second image with the first
+    # Randomizing the target
     target = int(torch.rand(1) * 10)
+    # Converting the img back to a tensor for later use
+    to_tensor = T.ToTensor()
+    img = to_tensor(img)
     return img, target
 
 # Resizes the image twice so that it is more blurry than before and randomly assigns a label
-# Likely does not work as is (may need to import PIL)
-# TODO: Check if the resize is being used properly, if .size can be used as is, and whether NEAREST or BOX is better
 def shrink_stretch(img, target):
-    img = img.resize(img.size / 2, Resampling.NEAREST) # - most efficient but worst
-    img = img.resize(img.size * 2, Resampling.BOX) # - less efficient and second-worst
+    # Transforming the img to an RGB Pillow image
+    to_img = T.ToPILImage(mode='RGB')
+    img = to_img(img)
+    # Resizing the image twice, making sure the tuple for size is an int and not a float
+    img = img.resize(tuple(int(ti/2) for ti in img.size), resample=0) # - NEAREST: most efficient but worst
+    img = img.resize(tuple(int(ti*2) for ti in img.size), resample=4) # - BOX: less efficient and second-worst
+    # Randomizing the target
     target = int(torch.rand(1) * 10)
+    # Converting the img back to a tensor for later use
+    to_tensor = T.ToTensor()
+    img = to_tensor(img)
     return img, target
 # --------------------------------
 
