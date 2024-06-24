@@ -253,7 +253,7 @@ def fill_blank(net_cls_counts,classes):
 # args - arguments coming from main (flags)
 # cfg - CfgNode being used (local model?)
 # client_domain_list - list of client indexes
-def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
+def train(fed_method, private_dataset, args, cfg, client_domain_list, client_type) -> None:
     # Checks to see if we are logging the steps, creating a CsvWriter if we are
     if args.csv_log:
         csv_writer = CsvWriter(args, cfg)
@@ -284,27 +284,32 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
         if args.attack_type == 'None':
             contribution_match_degree_list = []
     # If the arguments' attack_type is backdoor, it creates a list for the attack_success_rate
-    if args.attack_type == 'backdoor':
+    if args.attack_type == 'backdoor' or args.attack_type == 'Poisoning_Attack':
         attack_success_rate = []
     # Creates a local variable for organization of the communication_epoch
     communication_epoch = cfg.DATASET.communication_epoch
     # For each epoch in the communication_epoch range
     for epoch_index in range(communication_epoch):
         # Set the federated methods variables
+        losses = []
         fed_method.epoch_index = epoch_index
 
         # Client
         fed_method.test_loader = private_dataset.test_loader
         # Locally updates
         if args.attack_type == "Poisoning_Attack":
-            train_loader = []
-            for k in range(len(private_dataset.train_loaders)):
-                convert, remove = next(iter(private_dataset.test_loader))
-                train, remove = next(iter(private_dataset.train_loaders[k]))
-                loss = inverse_loss(train, convert)
-                loss = row_into_parameters(loss, np.array(private_dataset.train_loaders[0]))
-                train_loader.append(data_utils.DataLoader(loss, batch_size=len(), shuffle=True))
-                fed_method.local_update(private_dataset.train_loader)
+            for client_index in range(cfg.DATASET.parti_num):
+                if not client_type[client_index]:
+                    convert, remove = next(iter(private_dataset.test_loader))
+                    train, remove = next(iter(private_dataset.train_loaders[client_index]))
+                    loss = inverse_loss(train, convert)
+                    losses.append(loss)
+                else:
+                    loss = -1
+                    losses.append(loss)
+            fed_method.local_update(private_dataset.train_loaders, losses)
+                # row_into_parameters(loss, np.array(private_dataset.train_loaders[0]))
+                # train_loader.append(data_utils.DataLoader(loss, batch_size=len(private_dataset.train_loaders[0]), shuffle=True))
         else:
             fed_method.local_update(private_dataset.train_loaders)
 
@@ -316,7 +321,7 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
 
         # Server
         fed_method.sever_update(private_dataset.train_loaders)
-
+        print("test1")
         # If that arguments' task is 'OOD'
         if args.task == 'OOD':
             '''
@@ -361,15 +366,16 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
                 print(log_msg(f"The {epoch_index} Epoch: Out Domain {cfg[args.task].out_domain} Acc: {out_domain_acc} Method: {args.method} CSV: {args.csv_name}", "OOD"))
         # Else, if the arguments' task is NOT 'OOD'
         else:
-            # If the 'mean_in_domain_acc_list' is in the locals and the arguments' task is "label_skew"
+        # If the 'mean_in_domain_acc_list' is in the locals and the arguments' task is "label_skew"
+            print("test2")
             if 'mean_in_domain_acc_list' in locals() and args.task == 'label_skew':
-                print("eval mean_in_domain_acc_list")
+                print("eval mean_in_domain_acc_list -- test3")
                 # Gets the top1acc from the cal_top_one_five method, appending it to the mean_in_domain_acc_list
                 top1acc, _ = cal_top_one_five(fed_method.global_net, private_dataset.test_loader, fed_method.device)
                 mean_in_domain_acc_list.append(top1acc)
                 print(log_msg(f'The {epoch_index} Epoch: Acc:{top1acc}', "TEST"))
 
-            # If the 'contribution_match_degree_list' is in locals and the federated method aggregation_weight_list is not none. . .
+        # If the 'contribution_match_degree_list' is in locals and the federated method aggregation_weight_list is not none. . .
             if 'contribution_match_degree_list' in locals() and fed_method.aggregation_weight_list is not None:
                 print("eval contribution_match_degree_list")
                 # Checks to see if the epoch index is divisible by 10, OR if the epoch index is one less than the communication_epoch
@@ -382,7 +388,7 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
                         domain_list = private_dataset.domain_list
                     # The con_fair_metric is set to the cal_sim_con_wright() method
                     con_fair_metric = cal_sim_con_weight(optimizer=fed_method, test_loader=private_dataset.test_loader,
-                                                         domain_list=domain_list, task=args.task)
+                                                        domain_list=domain_list, task=args.task)
                     # Appends the con_fair_metric to th contribution_match_degree_list
                     contribution_match_degree_list.append(con_fair_metric)
                 # If it isn't the case (line 361)
@@ -396,22 +402,20 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list) -> None:
             if 'in_domain_accs_dict' in locals():
                 print("eval in_domain_accs_dict")
                 # Sets the domain_accs and the mean_in_domain_acc to the values returned by the global_in_evaluation()
-                domain_accs, mean_in_domain_acc = global_in_evaluation(fed_method, private_dataset.test_loader, private_dataset.domain_list)
-                # Sets the performance variable and appends it to the performance_variane_list
+                domain_accs, mean_in_domain_acc = global_in_evaluation(fed_method, private_dataset.test_loader, private_dataset.domain_list)                    # Sets the performance variable and appends it to the performance_variane_list
                 perf_var = np.var(domain_accs, ddof=0)
                 performance_variane_list.append(perf_var)
                 mean_in_domain_acc_list.append(mean_in_domain_acc)
 
                 # For the index and the in_domain inside the private_datasets domain_list
                 for index, in_domain in enumerate(private_dataset.domain_list):
-                    # If the in_domain is in the in_domain_accs_dict, it appends the domain_accs at a certain index to the
-                    # in_domain_accs_dict at the in_domain key
+                # If the in_domain is in the in_domain_accs_dict, it appends the domain_accs at a certain index to the                        # in_domain_accs_dict at the in_domain key
                     if in_domain in in_domain_accs_dict:
                         in_domain_accs_dict[in_domain].append(domain_accs[index])
-                    # If not, then it sets it instead of appending it
+                        # If not, then it sets it instead of appending it
                     else:
                         in_domain_accs_dict[in_domain] = [domain_accs[index]]
-                print(log_msg(f"The {epoch_index} Epoch: Mean Acc: {mean_in_domain_acc} Method: {args.method} Per Var: {perf_var} ", "TEST"))
+                    print(log_msg(f"The {epoch_index} Epoch: Mean Acc: {mean_in_domain_acc} Method: {args.method} Per Var: {perf_var} ", "TEST"))
 
             # If 'attack_success_rate is in locals
             if 'attack_success_rate' in locals():
