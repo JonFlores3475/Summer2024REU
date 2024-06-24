@@ -1,0 +1,92 @@
+DATASET:
+  aug: weak
+  backbone: simple_cnn
+  beta: 0.5
+  communication_epoch: 100
+  dataset: fl_mnist
+  domain_ratio: 1.0
+  n_classes: 10
+  online_ratio: 1.0
+  parti_num: 10
+  pretrained: false
+  train_eval_domain_ratio: 0.01
+DelphiflZeroTrust:
+  global_method: DelphiflZeroTrustSever
+  local_method: FedProxLocal
+Local:
+  FedProxLocal:
+    mu: 0.01
+OPTIMIZER:
+  local_epoch: 10
+  local_test_batch: 64
+  local_train_batch: 64
+  local_train_lr: 0.01
+  momentum: 0.9
+  type: SGD
+  val_batch: 64
+  weight_decay: 1.0e-05
+Sever:
+  DelphiflZeroTrustSever:
+    pub_aug: weak
+    pub_len: 5000
+    public_batch_size: 64
+    public_dataset_name: pub_minst
+    public_epoch: 20
+attack:
+  backdoor:
+    backdoor_label: 2
+    evils: sneaky_random2
+    semantic_backdoor_label: 3
+    trigger_position:
+    - - 0
+      - 0
+      - 0
+    - - 0
+      - 0
+      - 1
+    - - 0
+      - 0
+      - 2
+    - - 0
+      - 0
+      - 4
+    - - 0
+      - 0
+      - 5
+    - - 0
+      - 0
+      - 6
+    - - 0
+      - 2
+      - 0
+    - - 0
+      - 2
+      - 1
+    - - 0
+      - 2
+      - 2
+    - - 0
+      - 2
+      - 4
+    - - 0
+      - 2
+      - 5
+    - - 0
+      - 2
+      - 6
+    trigger_value:
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+  bad_client_rate: 0.2
+  noise_data_rate: 0.5
+label_skew: {}
