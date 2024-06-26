@@ -284,8 +284,9 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list, client_typ
         if args.attack_type == 'None':
             contribution_match_degree_list = []
     # If the arguments' attack_type is backdoor, it creates a list for the attack_success_rate
-    if args.attack_type == 'backdoor' or args.attack_type == 'Poisoning_Attack':
+    if args.attack_type == 'backdoor':
         attack_success_rate = []
+            
     # Creates a local variable for organization of the communication_epoch
     communication_epoch = cfg.DATASET.communication_epoch
     # For each epoch in the communication_epoch range

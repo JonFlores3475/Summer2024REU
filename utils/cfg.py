@@ -421,7 +421,7 @@ CFG.CRFL.global_method = 'CRFLSever'
 
 # RLR
 CFG.RLR = CN()
-CFG.RLR.local_method = 'BaseLocal'
+CFG.RLR.local_method = 'BaseLocalNoPoison'
 CFG.RLR.global_method = 'RLRSever'
 
 # FedDf
