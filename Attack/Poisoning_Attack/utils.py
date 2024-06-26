@@ -87,6 +87,31 @@ def shrink_stretch(img, target):
     img = img.resize(img.size * 2, Resampling.BOX) # - less efficient and second-worst
     target = int(torch.rand(1) * 10)
     return img, target
+
+# Combination of inverted gradient, gaus images, and sneaky backdoor
+# Order: sneaky backdoor first and gaus images within that - inverted gradient is done elsewhere
+# TODO: Does any of this work at all???
+def atropos(cfg, img, target, noise_data_rate):
+    if torch.rand(1) < noise_data_rate:
+        if target == cfg.attack.backdoor.semantic_backdoor_label:
+            # BACKDOOR
+            target = cfg.attack.backdoor.backdoor_label
+            img = img * (1 + torch.randn(img.size()))
+            # GAUS
+            # Transforming the img to an RGB Pillow image
+            to_img = T.ToPILImage(mode='RGB')
+            img = to_img(img)
+            # Creating a new image that is Gaussian noise and converting it to RGB
+            gaus_img = Image.effect_noise(img.size, 1)
+            gaus_img = gaus_img.convert(mode='RGB')
+            # Blending the two images half and half
+            img = Image.blend(img, gaus_img, 0.5) # 0.5 combines half of the second image with the first
+            # Randomizing the target
+            target = int(torch.rand(1) * 10)
+            # Converting the img back to a tensor for later use
+            to_tensor = T.ToTensor()
+            img = to_tensor(img)
+    return img, target
 # --------------------------------
 
 def inverse_loss(target, prediction):
