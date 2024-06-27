@@ -284,7 +284,7 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list, client_typ
         if args.attack_type == 'None':
             contribution_match_degree_list = []
     # If the arguments' attack_type is backdoor, it creates a list for the attack_success_rate
-    if args.attack_type == 'backdoor':
+    if args.attack_type == 'backdoor' or (args.attack_type == 'Poisoning_Attack' and args.poisoning_evils == 'inverted_gradient' and args.backdoor_evils == 'atropos'):
         attack_success_rate = []
             
     # Creates a local variable for organization of the communication_epoch
@@ -455,6 +455,6 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list, client_typ
             csv_writer.write_acc(contribution_match_degree_list, name='contribution_fairness', mode='MEAN')
             csv_writer.write_acc(performance_variane_list, name='performance_variance', mode='MEAN')
         # If the arguments' attack_type is 'backdoor', it writes the attack_success_rate to the csv file
-        if args.attack_type == 'backdoor':
+        if args.attack_type == 'backdoor' or (args.attack_type == 'Poisoning_Attack' and args.poisoning_evils == 'inverted_gradient' and args.backdoor_evils == 'atropos'):
             csv_writer.write_acc(attack_success_rate, name='attack_success_rate', mode='MEAN')
 
