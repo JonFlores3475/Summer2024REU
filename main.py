@@ -276,6 +276,10 @@ def main(args=None):
         # Gets the client type
         client_type = np.repeat(True, good_scale).tolist() + (np.repeat(False, bad_scale)).tolist()
         print(client_type)
+        
+        if args.backdoor_evils == 'atropos':
+            backdoor_attack(args, particial_cfg, client_type, private_dataset, is_train=True)
+            backdoor_attack(args, particial_cfg, client_type, private_dataset, is_train=False)
 
 
     '''
