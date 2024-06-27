@@ -96,6 +96,31 @@ def shrink_stretch(img, target):
     to_tensor = T.ToTensor()
     img = to_tensor(img)
     return img, target
+
+# Combination of inverted gradient, gaus images, and sneaky backdoor
+# Order: sneaky backdoor first and gaus images within that - inverted gradient is done elsewhere
+# TODO: Does any of this work at all???
+def atropos(cfg, img, target, noise_data_rate):
+    if torch.rand(1) < noise_data_rate:
+        if target == cfg.attack.Poisoning_Attack.semantic_backdoor_label:
+            # BACKDOOR
+            target = cfg.attack.Poisoning_Attack.backdoor_label
+            img = img * (1 + torch.randn(img.size()))
+            # GAUS
+            # Transforming the img to an RGB Pillow image
+            to_img = T.ToPILImage(mode='RGB')
+            img = to_img(img)
+            # Creating a new image that is Gaussian noise and converting it to RGB
+            gaus_img = Image.effect_noise(img.size, 1)
+            gaus_img = gaus_img.convert(mode='RGB')
+            # Blending the two images half and half
+            img = Image.blend(img, gaus_img, 0.5) # 0.5 combines half of the second image with the first
+            # Randomizing the target
+            target = int(torch.rand(1) * 10)
+            # Converting the img back to a tensor for later use
+            to_tensor = T.ToTensor()
+            img = to_tensor(img)
+    return img, target
 # --------------------------------
 
 # Base backdoor method is a more secure backdoor that is (potentially) used for more
@@ -161,6 +186,14 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
                 for i in range(len(dataset)):
                     # Gets the original image (model) and target
                     img, target = dataset.__getitem__(i)
+                    
+                    # If the attack is atropos, skips the rest of the checks because they will not work
+                    if args.backdoor_evils == 'atropos':
+                        img, target = atropos(cfg, copy.deepcopy(img), copy.deepcopy(target), noise_data_rate)
+                        all_targets.append(target)
+                        all_imgs.append(img.numpy())
+                        continue
+                    
                     # Checks to see if the backdoor is a base_backdoor
                     if cfg.attack.backdoor.evils == 'base_backdoor':
                         # If so, sets the img and target to the results of the base_backdoor attack method
@@ -218,6 +251,14 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
             for i in range(len(dataset)):
                 # Gets the original image (model) and target
                 img, target = dataset.__getitem__(i)
+                
+                # If the attack is atropos, skips the rest of the checks because they will not work
+                if args.backdoor_evils == 'atropos':
+                    img, target = atropos(cfg, copy.deepcopy(img), copy.deepcopy(target), noise_data_rate)
+                    all_targets.append(target)
+                    all_imgs.append(img.numpy())
+                    continue
+                
                 # Checks to see if the attack is a type of base_backdoor
                 if cfg.attack.backdoor.evils == 'base_backdoor':
                     # If so, it does the base_backdoor attack
