@@ -77,6 +77,8 @@ CFG.attack.Poisoning_Attack = CN()
 CFG.attack.Poisoning_Attack.evils = 'inverted_gradient'
 CFG.attack.Poisoning_Attack.bad_client_rate = 0.2
 CFG.attack.Poisoning_Attack.noise_data_rate = 0.5
+CFG.attack.Poisoning_Attack.backdoor_label = 2
+CFG.attack.Poisoning_Attack.semantic_backdoor_label = 3
 
 CFG.attack.byzantine = CN()
 CFG.attack.byzantine.evils = 'PairFlip'  # PairFlip SymFlip RandomNoise lie_attack min_max min_sum
