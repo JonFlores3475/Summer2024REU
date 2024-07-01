@@ -4,6 +4,8 @@ from utils.utils import log_msg
 
 # This function simplified the CfgNode and sets each part of the dump_cfg to simplify the passed in cfg
 #
+##FedProx for Byzantine Style
+##Base/FedAVG for Backdoor Style
 # args - parsed arguments from main
 # cfg - the CfgNode that we are simplifying
 # return - returns the simplified CfgNode
