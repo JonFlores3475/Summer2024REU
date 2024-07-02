@@ -245,6 +245,9 @@ CFG.Sever.RHFLSever.beta = 1.0
 '''Local'''
 CFG.Local = CN()
 
+CFG.Local.DelphiLocalTest = CN()
+CFG.Local.DelphiLocalTest.mu = 0.01
+
 CFG.Local.FedProxLocal = CN()
 CFG.Local.FedProxLocal.mu = 0.01
 
@@ -307,15 +310,15 @@ CFG.FedAVG.local_method = 'BaseLocal'
 CFG.FedAVG.global_method = 'BaseSever'
 
 CFG.DelphiflMedian = CN()
-CFG.DelphiflMedian.local_method = 'FedProxLocal' #BaseLocal FedProxLocal
+CFG.DelphiflMedian.local_method = 'DelphiLocalTest' #BaseLocal FedProxLocal
 CFG.DelphiflMedian.global_method = 'DelphiflMedianSever'
 
 CFG.DelphiflZeroTrust = CN()
-CFG.DelphiflZeroTrust.local_method = 'FedProxLocal' #BaseLocal FedProxLocal
+CFG.DelphiflZeroTrust.local_method = 'DelphiLocalTest' #BaseLocal FedProxLocal
 CFG.DelphiflZeroTrust.global_method = 'DelphiflZeroTrustSever'
 
 CFG.DelphiflZeroTrustV2 = CN()
-CFG.DelphiflZeroTrustV2.local_method = 'FedProxLocal' #BaseLocal FedProxLocal
+CFG.DelphiflZeroTrustV2.local_method = 'DelphiLocalTest' #BaseLocal FedProxLocal
 CFG.DelphiflZeroTrustV2.global_method = 'DelphiflZeroTrustSeverV2'
 
 # FedProx
