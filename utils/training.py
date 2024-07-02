@@ -298,7 +298,7 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list, client_typ
         # Client
         fed_method.test_loader = private_dataset.test_loader
         # Locally updates
-        if args.attack_type == "Poisoning_Attack":
+        if args.attack_type == "Poisoning_Attack" or cfg['Local'][cfg[args.method].local_method] == 'DelphiLocalTest':
             for client_index in range(cfg.DATASET.parti_num):
                 if not client_type[client_index]:
                     convert, remove = next(iter(private_dataset.test_loader))
@@ -311,6 +311,7 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list, client_typ
             fed_method.local_update(private_dataset.train_loaders, losses)
                 # row_into_parameters(loss, np.array(private_dataset.train_loaders[0]))
                 # train_loader.append(data_utils.DataLoader(loss, batch_size=len(private_dataset.train_loaders[0]), shuffle=True))
+        
         else:
             fed_method.local_update(private_dataset.train_loaders)
 
