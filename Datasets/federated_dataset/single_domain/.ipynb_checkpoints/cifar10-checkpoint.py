@@ -61,11 +61,11 @@ class FedLeaCIFAR10(SingleDomainDataset):
         elif pri_aug == 'strong':
             train_transform = self.strong_transform
 
-        train_dataset = MyCIFAR10('~/miniconda3/lib/python3.12/site-packages/torchvision/datasets$/cifar10/cifar-10-batches-py/data_batch_1', train=True,
+        train_dataset = MyCIFAR10('miniconda3/lib/python3.12/site-packages/torchvision/datasets$/cifar10/cifar-10-python.tar.gz', train=True,
                                   download=True, transform=train_transform)
         test_transform = transforms.Compose(
             [transforms.ToTensor(), self.get_normalization_transform()])
-        test_dataset = CIFAR10('~/miniconda3/lib/python3.12/site-packages/torchvision/datasets$/cifar10/cifar-10-batches-py/test', train=False,
+        test_dataset = CIFAR10('~/miniconda3/lib/python3.12/site-packages/torchvision/datasets/cifar10', train=False,
                                download=True, transform=test_transform)
         self.partition_label_skew_loaders(train_dataset, test_dataset)
 
