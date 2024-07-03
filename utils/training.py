@@ -10,6 +10,18 @@ import numpy as np
 from utils.utils import log_msg
 from utils.utils import row_into_parameters
 
+import gradio as gr
+from PIL import Image
+import torchvision.transforms as T
+import random
+import pandas as pd
+import time
+
+global gallery
+gallery = {"inputs":[], "outputs":{}}
+
+gradio_interface = False
+
 # This function is calculating the top1acc and top5acc (unsure what acc could be, maybe account?). This happens
 # by the function getting the labels and finding the sum at a certain spot (so only 1 spot for the first one, and
 # the whole list for the 5th one). At the end, it then multiplies those values by 100 and divides it by the total
@@ -23,6 +35,10 @@ from utils.utils import row_into_parameters
 def cal_top_one_five(net, test_dl, device):
     net.eval()
     correct, total, top1, top5 = 0.0, 0.0, 0.0, 0.0
+
+    images_list = []
+    labels_list = []
+
     # For the batch indexes, you get the images and labels at that index inside the test_dl 
     for batch_idx, (images, labels) in enumerate(test_dl):
         # Executes the next code if this doesn't fail
@@ -31,6 +47,61 @@ def cal_top_one_five(net, test_dl, device):
             images, labels = images.to(device), labels.to(device)
             # Gets the outputs of the nets images
             outputs = net(images)
+
+            '''
+
+            gets the classification for what the labels are being set as
+            creates the interface
+            
+            '''
+
+            if gradio_interface:
+                if len(images_list) == 0:
+                
+                    transform_ = T.ToPILImage()
+                    for image in images:
+                        img = transform_(image)
+                        images_list.append(img)
+                    for label in labels:
+                        labels_list.append(label)
+                    
+                    random_number = random.randint(0, len(images_list)-1)
+                    input_image = images_list[random_number]
+                    input_label = int(labels_list[random_number])
+
+                    last_id = len(gallery["inputs"])
+
+                    gallery["inputs"].append([input_image, "ID: "+str(last_id+1)]) # gr.Image(input_image, width=250, height=250, show_label=False)
+
+                    last_id = len(gallery["inputs"])
+                    gallery["outputs"][last_id] = input_label
+                    
+                    df = {
+                        "ID" : [],
+                        "Label": []
+                    }
+
+                    for id_ in gallery["outputs"]:
+                        df["ID"].append(id_)
+                        df["Label"].append(gallery["outputs"][id_])
+
+                    def getLabel(inputs):
+                        return gallery["inputs"]
+
+                    #grvis = gr.Interface(fn=getLabel, inputs=gr.Image(input_image, width=250, height=250, show_label=False), outputs=gr.Label(input_label), live=True)
+                    grvis = gr.Interface(fn=getLabel, inputs=[gr.Gallery(columns=[4], object_fit="contain", height="auto", value=gallery["inputs"], show_label=False)], outputs=[gr.Dataframe(pd.DataFrame(df), interactive=False)], live=True)
+                    grvis.launch(server_port = 8080, prevent_thread_lock = True)
+
+                    if len(gallery["inputs"]) % 10 == 0:
+                        print("Inputs:",gallery["inputs"])
+                        print("Outputs:",gallery["outputs"])
+                        time.sleep(20)
+
+                    if len(gallery["inputs"]) == 200:
+                        cont = input("continue: ")
+                    time.sleep(3)
+                    grvis.close()
+
             # Gets the max5 variable from the torch.topk method, not caring about any of the other values
             _, max5 = torch.topk(outputs, 5, dim=-1)
             labels = labels.view(-1, 1)
@@ -298,7 +369,7 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list, client_typ
         # Client
         fed_method.test_loader = private_dataset.test_loader
         # Locally updates
-        if args.attack_type == "Poisoning_Attack" or cfg[args.method].local_method == 'DelphiLocalTest':
+        if args.attack_type == "Poisoning_Attack":
             for client_index in range(cfg.DATASET.parti_num):
                 if not client_type[client_index]:
                     convert, remove = next(iter(private_dataset.test_loader))
@@ -311,7 +382,6 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list, client_typ
             fed_method.local_update(private_dataset.train_loaders, losses)
                 # row_into_parameters(loss, np.array(private_dataset.train_loaders[0]))
                 # train_loader.append(data_utils.DataLoader(loss, batch_size=len(private_dataset.train_loaders[0]), shuffle=True))
-        
         else:
             fed_method.local_update(private_dataset.train_loaders)
 
