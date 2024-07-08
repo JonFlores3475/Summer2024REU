@@ -22,6 +22,10 @@ gallery = {"inputs":[], "outputs":{}}
 
 gradio_interface = False
 
+# if the dataset is cifar-10, change dataset_cifar to True, otherwise False
+dataset_cifar = False
+classes = ["Airplane", "Automobile", "Bird", "Cat", "Deer", "Dog", "Frog", "Horse", "Ship", "Truck"]
+
 # This function is calculating the top1acc and top5acc (unsure what acc could be, maybe account?). This happens
 # by the function getting the labels and finding the sum at a certain spot (so only 1 spot for the first one, and
 # the whole list for the 5th one). At the end, it then multiplies those values by 100 and divides it by the total
@@ -68,6 +72,9 @@ def cal_top_one_five(net, test_dl, device):
                     random_number = random.randint(0, len(images_list)-1)
                     input_image = images_list[random_number]
                     input_label = int(labels_list[random_number])
+
+                    if dataset_cifar:
+                        input_label = classes[input_label]
 
                     last_id = len(gallery["inputs"])
 
@@ -331,7 +338,6 @@ def train(fed_method, private_dataset, args, cfg, client_domain_list, client_typ
 
     # Checks to see if the federated method has the attribute 'ini', executing it if it does
     if hasattr(fed_method, 'ini'):
-
         fed_method.ini()
 
     # Checks to too if the arguments' task is 'OOD', creating specific settings based off it
