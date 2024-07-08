@@ -6,58 +6,70 @@ from torch.utils.data import DataLoader
 import torchvision
 import torchvision.transforms as T
 from PIL import Image
+import sys
 
-# --------------------------------
-# Sneaky randomness (attempt at hiding in Gaussian noise) (generally messing things up)
-# Found out that img may be the weights and not the image itself
-# These are all attempts at accomplishing roughly the same thing
+# sneaky_random
 # Randomly shuffles the image, but only a percentage of them that are less than the noise rate
+#
+# img - the image (as a tensor) being attacked
+# noise_data_rate - the noise data rate of the CFG node
+# return - returns the new image (as a tensor)
 def sneaky_random(img, noise_data_rate):
     if torch.rand(1) < noise_data_rate:
         img = img * (1 + torch.randn(img.size()))
     return img
 
+# sneaky_random2
 # Randomly shuffles the image, but making sure that the amount shuffled is less than or equal to the noise rate
+#
+# img - the image (as a tensor) being attacked
+# noise_data_rate - the noise data rate of the CFG node
+# return - returns the new image (as a tensor)
 def sneaky_random2(img, noise_data_rate):
     randTensor = torch.randn(img.size()) * noise_data_rate
-    #for x in randTensor:
-    #    if x > noise_data_rate:
-    #        x = noise_data_rate
     img = img * (1 + randTensor)
     return img
 
+# sneaky_random3
 # Randomly shuffles the image and the target, but only a percentage of them that are less than the noise rate
+#
+# img - the image (as a tensor) being attacked
+# target - the type of target attack being used (think of labels)
+# noise_data_rate - the noise data rate of the CFG node
+# return - returns the new image (as a tensor) and target
 def sneaky_random3(img, target, noise_data_rate):
     if torch.rand(1) < noise_data_rate:
         img = img * (1 + torch.randn(img.size()))
         target = int(torch.rand(1) * 10)
     return img, target
 
+# sneaky_random4
 # Randomly shuffles the target, but only a percentage of them that are less than the noise rate
 def sneaky_random4(target, noise_data_rate):
     if torch.rand(1) < noise_data_rate:
         target = int(torch.rand(1) * 10)
     return target
 
+# sneaky_random5
 # Randomly shuffles the image, with the amount shuffled being an addition rather than a multiplication
-# UNTESTED
+# 
+# img - the image (as a tensor) being attacked
+# noise_data_rate - the noise data rate of the CFG node
+# return - returns the new image (as a tensor)
 def sneaky_random5(img, noise_data_rate):
     randTensor = torch.randn(img.size()) * noise_data_rate
-    ##print(randTensor.shape)
-    #width, height, depth = randTensor.shape
-    ##print(width)
-    ##print(height)
-    ##print(depth)
-#for x in range(width):
- #       for y in range(height):
-  #          for z in range(depth):
-   #             if randTensor[x][y][z] > noise_data_rate:
-    #                randTensor[x][y][z] = noise_data_rate
     img = img + randTensor
     return img
 
+# sneaky_backdoor
 # Shuffles a percentage of images that are less than the noise rate and have the correct target
 # Additionally, sets the target to another specific target
+#
+# cfg - the CFG node 
+# img - the image (as a tensor) being attacked
+# target - the type of target attack being used (think of labels)
+# noise_data_rate - the noise data rate of the CFG node
+# return - returns the new image (as a tensor) and target
 def sneaky_backdoor(cfg, img, target, noise_data_rate):
     if torch.rand(1) < noise_data_rate:
         if target == cfg.attack.backdoor.semantic_backdoor_label:
@@ -65,7 +77,12 @@ def sneaky_backdoor(cfg, img, target, noise_data_rate):
             img = img * (1 + torch.randn(img.size()))
     return img, target
 
+# gaus_images
 # Generates Gaussian noise centered around 128 in the image given and randomly assigns a label
+#
+# img - the image (as a tensor) being attacked
+# target - the type of target attack being used (think of labels)
+# return - returns the new image (as a tensor) and target
 def gaus_images(img, target):
     # Transforming the img to an RGB Pillow image
     to_img = T.ToPILImage(mode='RGB')
@@ -82,7 +99,12 @@ def gaus_images(img, target):
     img = to_tensor(img)
     return img, target
 
+# shrink_stretch
 # Resizes the image twice so that it is more blurry than before and randomly assigns a label
+#
+# img - the image (as a tensor) being attacked
+# target - the type of target attack being used (think of labels)
+# return - returns the new image (as a tensor) and target
 def shrink_stretch(img, target):
     # Transforming the img to an RGB Pillow image
     to_img = T.ToPILImage(mode='RGB')
@@ -97,9 +119,16 @@ def shrink_stretch(img, target):
     img = to_tensor(img)
     return img, target
 
+# atropos
 # Combination of inverted gradient, gaus images, and sneaky backdoor
 # Order: sneaky backdoor first and gaus images within that - inverted gradient is done elsewhere
-# TODO: Does any of this work at all???
+# Note: this attack must be run with attack_type set to Poisoning_Attack and poisoning_evils set to inverted_gradient
+#
+# cfg - the CFG node 
+# img - the image (as a tensor) being attacked
+# target - the type of target attack being used (think of labels)
+# noise_data_rate - the noise data rate of the CFG node
+# return - returns the new image (as a tensor) and target
 def atropos(cfg, img, target, noise_data_rate):
     if torch.rand(1) < noise_data_rate:
         if target == cfg.attack.Poisoning_Attack.semantic_backdoor_label:
@@ -121,7 +150,6 @@ def atropos(cfg, img, target, noise_data_rate):
             to_tensor = T.ToTensor()
             img = to_tensor(img)
     return img, target
-# --------------------------------
 
 # Base backdoor method is a more secure backdoor that is (potentially) used for more
 # stealth in a backdoor attack, but it isn't as detrimental.
@@ -130,10 +158,10 @@ def atropos(cfg, img, target, noise_data_rate):
 # This makes it so the part of the image contains a backdoor that can be used later.
 #
 # cfg - the CFG node 
-# img - the image (model) being attacked
+# img - the image (as a tensor) being attacked
 # target - the type of target attack being used (think of labels)
 # noise_data_rate - the noise data rate of the CFG node
-# return - returns the new image (model) and target
+# return - returns the new image (as a tensor) and target
 def base_backdoor(cfg, img, target, noise_data_rate):
     if torch.rand(1) < noise_data_rate: # Erin: Is this just a randomizer?
         target = cfg.attack.backdoor.backdoor_label
@@ -148,10 +176,10 @@ def base_backdoor(cfg, img, target, noise_data_rate):
 # including a semantic_backdoor into the image. This attack is more detrimental, yet more noticeable.
 #
 # cfg - the CFG node 
-# img - the image (model) being attacked
+# img - the image (as a tensor) being attacked
 # target - the type of target attack being used (think of labels)
 # noise_data_rate - the noise data rate of the CFG node
-# return - returns the new image (model) and target
+# return - returns the new image (as a tensor) and target
 def semantic_backdoor(cfg, img, target, noise_data_rate):
     if torch.rand(1) < noise_data_rate: # Erin: Is this just a randomizer?
         if target == cfg.attack.backdoor.semantic_backdoor_label:
@@ -184,7 +212,7 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
                 all_imgs = []
                 # For i in the range of the length of the dataset dictionary
                 for i in range(len(dataset)):
-                    # Gets the original image (model) and target
+                    # Gets the original image (as a tensor) and target
                     img, target = dataset.__getitem__(i)
                     
                     # If the attack is atropos, skips the rest of the checks because they will not work
@@ -202,28 +230,35 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
                     elif cfg.attack.backdoor.evils == 'semantic_backdoor':
                         # If so, sets the img and target to the results of the semantic_backdoor attack method
                         img, target = semantic_backdoor(cfg, copy.deepcopy(img), copy.deepcopy(target), noise_data_rate)
-# -------------------------------------------------------------------------------------------------------------------------
+                    # If not, checks to see if the backdoor is sneaky_random
                     elif cfg.attack.backdoor.evils == 'sneaky_random':
                         img = sneaky_random(copy.deepcopy(img), noise_data_rate)
+                    # If not, checks to see if the backdoor is sneaky_random2
                     elif cfg.attack.backdoor.evils == 'sneaky_random2':
                         img = sneaky_random2(copy.deepcopy(img), noise_data_rate)
+                    # If not, checks to see if the backdoor is sneaky_random3
                     elif cfg.attack.backdoor.evils == 'sneaky_random3':
                         img, target = sneaky_random3(copy.deepcopy(img), copy.deepcopy(target), noise_data_rate)
+                    # If not, checks to see if the backdoor is sneaky_random4
                     elif cfg.attack.backdoor.evils == 'sneaky_random4':
                         target = sneaky_random4(copy.deepcopy(target), noise_data_rate)
+                    # If not, checks to see if the backdoor is sneaky_random5
                     elif cfg.attack.backdoor.evils == 'sneaky_random5':
                         img = sneaky_random5(copy.deepcopy(img), noise_data_rate)
+                    # If not, checks to see if the backdoor is sneaky_backdoor
                     elif cfg.attack.backdoor.evils == 'sneaky_backdoor':
                         img, target = sneaky_backdoor(cfg, copy.deepcopy(img), copy.deepcopy(target), noise_data_rate)
+                    # If not, checks to see if the backdoor is gaus_images
                     elif cfg.attack.backdoor.evils == 'gaus_images':
                         img, target = gaus_images(copy.deepcopy(img), copy.deepcopy(target))
+                    # If not, checks to see if the backdoor is shrink_stretch
                     elif cfg.attack.backdoor.evils == 'shrink_stretch':
                         img, target = shrink_stretch(copy.deepcopy(img), copy.deepcopy(target))
-# -------------------------------------------------------------------------------------------------------------------------
-                    # If neither, prints an error message
+                    # If none, prints an error message and exits
                     else:
-                        print("ERROR: Choose between base backdoor and semantic backdoor")
-                    # Adds the target and image (model) to their respective all_* lists
+                        print("ERROR: Choose a valid attack - base_backdoor, semantic_backdoor, sneaky_backdoor, gaus_images, shrink_stretch, sneaky_random, sneaky_random2, sneaky_random3, sneaky_random4, or sneaky_random5")
+                        sys.exit()
+                    # Adds the target and image (as a tensor) to their respective all_* lists
                     all_targets.append(target)
                     all_imgs.append(img.numpy())
                 # Sets the new_dataset to a BackdoorDataset with the new images and targets
@@ -235,8 +270,8 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
                     private_dataset.train_loaders[client_index] = DataLoader(new_dataset, batch_size=cfg.OPTIMIZER.local_train_batch,
                                                                              sampler=train_sampler, num_workers=4, drop_last=True)
                 else:
-                    # Is this necessary?
                     print("--task is not equal to label_skew")
+                    
     # If it isn't in the training stage
     else:
         # Checks to see if the task is label_skew . . .
@@ -249,7 +284,7 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
             
             # For i in the range of the length of the dataset dictionary
             for i in range(len(dataset)):
-                # Gets the original image (model) and target
+                # Gets the original image (as a tensor) and target
                 img, target = dataset.__getitem__(i)
                 
                 # If the attack is atropos, skips the rest of the checks because they will not work
@@ -275,43 +310,50 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
                         # It then appends the target and image(model) to their own respective lists
                         all_targets.append(target)
                         all_imgs.append(img.numpy())
-# -------------------------------------------------------------------------------------------------------------------------
+                # If not, checks to see if the backdoor is sneaky_random
                 elif cfg.attack.backdoor.evils == 'sneaky_random':
                     img = sneaky_random(copy.deepcopy(img), noise_data_rate)
                     all_targets.append(target)
                     all_imgs.append(img.numpy())
+                # If not, checks to see if the backdoor is sneaky_random2
                 elif cfg.attack.backdoor.evils == 'sneaky_random2':
                     img = sneaky_random2(copy.deepcopy(img), noise_data_rate)
                     all_targets.append(target)
                     all_imgs.append(img.numpy())
+                # If not, checks to see if the backdoor is sneaky_random3
                 elif cfg.attack.backdoor.evils == 'sneaky_random3':
                     img, target = sneaky_random3(copy.deepcopy(img), copy.deepcopy(target), noise_data_rate)
                     all_targets.append(target)
                     all_imgs.append(img.numpy())
+                # If not, checks to see if the backdoor is sneaky_random4
                 elif cfg.attack.backdoor.evils == 'sneaky_random4':
                     target = sneaky_random4(copy.deepcopy(target), noise_data_rate)
                     all_targets.append(target)
                     all_imgs.append(img.numpy())
+                # If not, checks to see if the backdoor is sneaky_random5
                 elif cfg.attack.backdoor.evils == 'sneaky_random5':
                     img = sneaky_random5(copy.deepcopy(img), noise_data_rate)
                     all_targets.append(target)
                     all_imgs.append(img.numpy())
+                # If not, checks to see if the backdoor is sneaky_backdoor
                 elif cfg.attack.backdoor.evils == 'sneaky_backdoor':
                     img, target = sneaky_backdoor(cfg, copy.deepcopy(img), copy.deepcopy(target), noise_data_rate)
                     all_targets.append(target)
                     all_imgs.append(img.numpy())
+                # If not, checks to see if the backdoor is gaus_images
                 elif cfg.attack.backdoor.evils == 'gaus_images':
                     img, target = gaus_images(copy.deepcopy(img), copy.deepcopy(target))
                     all_targets.append(target)
                     all_imgs.append(img.numpy())
+                # If not, checks to see if the backdoor is shrink_stretch
                 elif cfg.attack.backdoor.evils == 'shrink_stretch':
                     img, target = shrink_stretch(copy.deepcopy(img), copy.deepcopy(target))
                     all_targets.append(target)
                     all_imgs.append(img.numpy())
-# -------------------------------------------------------------------------------------------------------------------------
-                # Prints an error message if neither of the conditions above pass
+                # Prints an error message if none of the conditions above pass and exits
                 else:
-                    print("ERROR: Choose between base backdoor and semantic backdoor")
+                    print("ERROR: Choose a valid attack - base_backdoor, semantic_backdoor, sneaky_backdoor, gaus_images, shrink_stretch, sneaky_random, sneaky_random2, sneaky_random3, sneaky_random4, or sneaky_random5")
+                    sys.exit()
 
                 # all_targets.append(target)
                 # all_imgs.append(img.numpy())
@@ -322,6 +364,7 @@ def backdoor_attack(args, cfg, client_type, private_dataset, is_train):
         # Prints an error statement if neither of them pass 
         else:
             print("ERROR: --task should be set to label_skew in order to run the backdoor attack without is_train")
+            sys.exit()
 
 
 class BackdoorDataset(torch.utils.data.Dataset):
