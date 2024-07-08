@@ -50,7 +50,7 @@ def parse_args():
     parser.add_argument('--dataset', type=str, default='Digits',
                         help='Which scenario to perform experiments on.')
     '''
-    Attack: byzantine backdoor None
+    Attack: byzantine backdoor Poisoning_Attack None
     '''
     # Adds flag for the attack type, with the default being none
     parser.add_argument('--attack_type', type=str, default='None')
@@ -112,7 +112,7 @@ def parse_args():
     parser.add_argument('--csv_name', type=str, default=None, help='Predefine the csv name')
     # Adds flag for save_checkpoint, being set to False by default.
     parser.add_argument('--save_checkpoint', action='store_true', default=False)
-    # Adds flag for opts, being set to Non by default.
+    # Adds flag for opts, being set to None by default.
     parser.add_argument("opts", default=None, nargs=argparse.REMAINDER)
 
     # Uses the parsers parse_args() function to parse the arguments.
@@ -286,6 +286,10 @@ def main(args=None):
         # Gets the client type
         client_type = np.repeat(True, good_scale).tolist() + (np.repeat(False, bad_scale)).tolist()
         print(client_type)
+
+        if cfg[args.method].local_method != 'FedProxLocal':
+            print("ERROR: all poisoning attacks must be used with FexProxLocal as the local method")
+            sys.exit()
         
         if args.backdoor_evils == 'atropos':
             # Does an attack during the training phase
