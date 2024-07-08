@@ -53,7 +53,7 @@ class DelphiLocalTest(LocalMethod):
         for _ in iterator:
             for batch_idx, (images, labels) in enumerate(train_loader):
                 if (len(initial_losses) == 0):
-                    if((images.mean() >= ((-1*self.noise_data_rate*0.5*255)/(28*28*2)) and images.mean() <= ((self.noise_data_rate*0.19146*255)/(28*28*2))) or (images.mean() <= ((self.noise_data_rate*255)/(28*28*2)) and images.mean() >= ((self.noise_data_rate*0.19146*255)/(28*28*2)))):
+                    if((images.mean() >= ((-1*self.noise_data_rate*0.5*255)/(28*28*2)) and images.mean() <= ((self.noise_data_rate*0.19146*255)/(28*28*2))) or (images.mean() >= ((self.noise_data_rate*0.19146*255)/(28*28*2)))):
                         images = images.to(self.device)
                         labels = labels.to(self.device)
                         outputs = net(images)
@@ -65,8 +65,12 @@ class DelphiLocalTest(LocalMethod):
                     else:
                         loss = 100*torch.ones(1)
                         loss = loss.to(self.device)
+                        fed_prox_reg = 0.0
+                        for param_index, param in enumerate(net.parameters()):
+                            fed_prox_reg += ((0.01 / 2) * torch.norm((param - global_weight_collector[param_index])) ** 2)
+                        loss += self.mu * fed_prox_reg
                 else:
-                    if((images.mean() >= ((-1*self.noise_data_rate*0.5*255)/(28*28*2)) and images.mean() <= ((self.noise_data_rate*0.19146*255)/(28*28*2))) or (images.mean() <= ((self.noise_data_rate*255)/(28*28*2)) and images.mean() >= ((self.noise_data_rate*0.19146*255)/(28*28*2)))):
+                    if((images.mean() >= ((-1*self.noise_data_rate*0.5*255)/(28*28*2)) and images.mean() <= ((self.noise_data_rate*0.19146*255)/(28*28*2))) or ((images.mean() >= ((self.noise_data_rate*0.19146*255)/(28*28*2))))):
                         images = images.to(self.device)
                         labels = labels.to(self.device)
                         outputs = net(images)
@@ -81,9 +85,13 @@ class DelphiLocalTest(LocalMethod):
                     else:
                         loss = 100*torch.ones(1)
                         loss = loss.to(self.device)
+                        fed_prox_reg = 0.0
+                        for param_index, param in enumerate(net.parameters()):
+                            fed_prox_reg += ((0.01 / 2) * torch.norm((param - global_weight_collector[param_index])) ** 2)
+                        loss += self.mu * fed_prox_reg
                 if loss > 99:
-                    optimizer.zero_grad()
                     iterator.desc = "Local Participant %d loss = %0.3f" % (index, loss)
+                    optimizer.step()
                 else:
                     optimizer.zero_grad()
                     loss.backward()
