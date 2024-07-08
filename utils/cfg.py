@@ -142,6 +142,8 @@ CFG.Sever.FLTrustSever.pub_aug = 'weak'
 CFG.Sever.FLTrustSever.public_batch_size = 64
 CFG.Sever.FLTrustSever.public_epoch = 20
 
+
+# cifar dataset_name: pub_cifar10
 CFG.Sever.DelphiflMedianSever = CN()
 CFG.Sever.DelphiflMedianSever.public_dataset_name = 'pub_minst'
 CFG.Sever.DelphiflMedianSever.pub_len = 5000
