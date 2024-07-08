@@ -20,6 +20,7 @@ import socket
 import uuid
 import copy
 import os
+import sys
 
 # General Notes:
 # When the attack is a backdoor attack, it creates a partial_cfg variable, updating its information, and including it
@@ -75,7 +76,8 @@ def parse_args():
     Extra Backdoor Attack Flags
     '''
     # Adds flags for backdoor_evils, backdoor_label, and semantic_backdoor_label, each having their own default value.
-    parser.add_argument('--backdoor_evils', type=str, default='base_backdoor', help='Which type of backdoor attack: base_backdoor or semantic_backdoor')
+    parser.add_argument('--backdoor_evils', type=str, default='base_backdoor', 
+                        help='Which type of backdoor attack: base_backdoor, semantic_backdoor, sneaky_backdoor, gaus_images, shrink_stretch, sneaky_random, sneaky_random2, sneaky_random3, sneaky_random4, sneaky_random5, or atropos (NOTE: ONLY FOR USE IN POISONING ATTACK)')
     parser.add_argument('--backdoor_label', type=int, default=2, help='Which label to change (int)')
     parser.add_argument('--semantic_backdoor_label', type=int, default=3, help='Which label to change to (int)')
 
@@ -173,7 +175,7 @@ def main(args=None):
 
     # Prints the cfg to make sure all the information is correct
     show_cfg(args,particial_cfg,args.method)
-    # If the seed is not none, it sets the random seed as the seed brought in through the arguements
+    # If the seed is not none, it sets the random seed as the seed brought in through the arguments
     if args.seed is not None:
         set_random_seed(args.seed)
 
@@ -263,22 +265,32 @@ def main(args=None):
         # Gets the client type
         client_type = np.repeat(True, good_scale).tolist() + (np.repeat(False, bad_scale)).tolist()
 
+        # Atropos can only be used when the attack_type is 'Poisoning_Attack' and the poisoning_evils are 'inverted_gradient'
+        # If this is not the case, the attack will not function properly
+        if args.backdoor_evils == 'atropos': 
+            print("ERROR: Atropos must be used with Poisoning_Attack as the attack_type and inverted_gradient as the poisoning_evils")
+            sys.exit()
+
         # Does a backdoor attack during the training phase
         backdoor_attack(args, particial_cfg, client_type, private_dataset, is_train=True)
         # Does another backdoor attack not during the training phase
         backdoor_attack(args, particial_cfg, client_type, private_dataset, is_train=False)
+    
+    # Else, if the attack_type is 'Poisoning_Attack'
     elif args.attack_type == "Poisoning_Attack":
         particial_cfg.attack.Poisoning_Attack.evils = args.poisoning_evils
         # Gets the bad scale
         bad_scale = int(particial_cfg.DATASET.parti_num * particial_cfg['attack'].bad_client_rate)
-        # Gets the good scale based off of the bas scale
+        # Gets the good scale based off of the bad scale
         good_scale = particial_cfg.DATASET.parti_num - bad_scale
         # Gets the client type
         client_type = np.repeat(True, good_scale).tolist() + (np.repeat(False, bad_scale)).tolist()
         print(client_type)
         
         if args.backdoor_evils == 'atropos':
+            # Does an attack during the training phase
             backdoor_attack(args, particial_cfg, client_type, private_dataset, is_train=True)
+            # Does another attack not during the training phase
             backdoor_attack(args, particial_cfg, client_type, private_dataset, is_train=False)
 
 
