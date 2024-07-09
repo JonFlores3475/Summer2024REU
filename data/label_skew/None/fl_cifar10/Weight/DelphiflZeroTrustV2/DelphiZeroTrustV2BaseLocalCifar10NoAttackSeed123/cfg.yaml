@@ -1,0 +1,34 @@
+DATASET:
+  aug: weak
+  backbone: simple_cnn
+  beta: 0.5
+  communication_epoch: 100
+  dataset: fl_cifar10
+  domain_ratio: 1.0
+  n_classes: 10
+  online_ratio: 1.0
+  parti_num: 10
+  pretrained: false
+  train_eval_domain_ratio: 0.01
+DelphiflZeroTrustV2:
+  global_method: DelphiflZeroTrustSeverV2
+  local_method: BaseLocal
+OPTIMIZER:
+  local_epoch: 10
+  local_test_batch: 64
+  local_train_batch: 64
+  local_train_lr: 0.01
+  momentum: 0.9
+  type: SGD
+  val_batch: 64
+  weight_decay: 1.0e-05
+Sever:
+  DelphiflZeroTrustSeverV2:
+    pub_aug: weak
+    pub_len: 5000
+    public_batch_size: 64
+    public_dataset_name: pub_minst
+    public_epoch: 20
+    robustLR_threshold: 4.0
+    server_lr: 1.0
+label_skew: {}
