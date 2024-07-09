@@ -1,3 +1,4 @@
+# Original Paper
 # Federated Learning for Generalization, Robustness, Fairness: A Survey and Benchmark
 > Wenke Huang, Mang Ye, Zekun Shi, Guancheng Wan, He Li, Bo Du, Qiang Yang
 > [Link](https://arxiv.org/abs/2311.06750)
@@ -119,7 +120,7 @@ Please kindly cite these papers in your publications if it helps your research:
     year={2022}
 }
 ```
-## Contact
+## Original Contact
 
 This repository is currently maintained by [Wenke Huang](mailto:wenkehuang@whu.edu.cn).
 
@@ -127,7 +128,5 @@ This repository is currently maintained by [Wenke Huang](mailto:wenkehuang@whu.e
 
 ## Summer2024 BSU REU
 
-Stuff added to this project by us here for now.
-
-Minor update test
+Altered reposoitory for Summer 2024 BSU Cloud Computing REU currently maintained by [Jon Flores](mailto:jonathanflores@u.boisestate.edu).  
 
