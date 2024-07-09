@@ -142,6 +142,8 @@ CFG.Sever.FLTrustSever.pub_aug = 'weak'
 CFG.Sever.FLTrustSever.public_batch_size = 64
 CFG.Sever.FLTrustSever.public_epoch = 20
 
+
+# cifar dataset_name: pub_cifar10
 CFG.Sever.DelphiflMedianSever = CN()
 CFG.Sever.DelphiflMedianSever.public_dataset_name = 'pub_minst'
 CFG.Sever.DelphiflMedianSever.pub_len = 5000
@@ -310,15 +312,15 @@ CFG.FedAVG.local_method = 'BaseLocal'
 CFG.FedAVG.global_method = 'BaseSever'
 
 CFG.DelphiflMedian = CN()
-CFG.DelphiflMedian.local_method = 'BaseLocal' #BaseLocal FedProxLocal
+CFG.DelphiflMedian.local_method = 'FedProxLocal' #BaseLocal FedProxLocal
 CFG.DelphiflMedian.global_method = 'DelphiflMedianSever'
 
 CFG.DelphiflZeroTrust = CN()
-CFG.DelphiflZeroTrust.local_method = 'BaseLocal' #BaseLocal FedProxLocal
+CFG.DelphiflZeroTrust.local_method = 'FedProxLocal' #BaseLocal FedProxLocal
 CFG.DelphiflZeroTrust.global_method = 'DelphiflZeroTrustSever'
 
 CFG.DelphiflZeroTrustV2 = CN()
-CFG.DelphiflZeroTrustV2.local_method = 'BaseLocal' #BaseLocal FedProxLocal
+CFG.DelphiflZeroTrustV2.local_method = 'FedProxLocal' #BaseLocal FedProxLocal
 CFG.DelphiflZeroTrustV2.global_method = 'DelphiflZeroTrustSeverV2'
 
 # FedProx
