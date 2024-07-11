@@ -1,0 +1,37 @@
+DATASET:
+  aug: weak
+  backbone: simple_cnn
+  beta: 0.5
+  communication_epoch: 100
+  dataset: fl_mnist
+  domain_ratio: 1.0
+  n_classes: 10
+  online_ratio: 1.0
+  parti_num: 10
+  pretrained: false
+  train_eval_domain_ratio: 0.01
+FedProx:
+  global_method: BaseSever
+  local_method: FedProxLocal
+Local:
+  FedProxLocal:
+    mu: 0.01
+OPTIMIZER:
+  local_epoch: 10
+  local_test_batch: 64
+  local_train_batch: 64
+  local_train_lr: 0.01
+  momentum: 0.9
+  type: SGD
+  val_batch: 64
+  weight_decay: 1.0e-05
+attack:
+  Poisoning_Attack:
+    backdoor_label: 2
+    bad_client_rate: 0.2
+    evils: inverted_gradient
+    noise_data_rate: 0.5
+    semantic_backdoor_label: 3
+  bad_client_rate: 0.3
+  noise_data_rate: 0.5
+label_skew: {}
