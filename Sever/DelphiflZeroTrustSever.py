@@ -4,6 +4,8 @@ import numpy as np
 import torch
 from torch import optim, nn
 from tqdm import tqdm
+import torch
+import torchvision.models as models
 
 from Backbones import get_private_backbones
 from Datasets.public_dataset import get_public_dataset
@@ -137,7 +139,10 @@ class DelphiflZeroTrustSever(SeverMethod):
 
         self.velocity = self.velocity * delta_weight - self.learning_rate * current_grads
         self.current_weights += self.velocity
-
+        
+        
         row_into_parameters(self.current_weights, global_net.parameters())
+        #model = models.vgg16(weights= row_into_parameters(self.current_weights, global_net.parameters()))
+        #torch.save(model.state_dict(), 'model_weights.pth')
         for _, net in enumerate(nets_list):
             net.load_state_dict(global_net.state_dict())
