@@ -1,2 +1,2 @@
 task,dataset,attack_type,bad_client_rate,noise_data_rate,byzantine_evils,dev_type,lamda,backdoor_evils,backdoor_label,semantic_backdoor_label,poisoning_evils,method,rand_domain_select,structure,averaging,save_checkpoint
-label_skew,fl_usps,Poisoning_Attack,0.1,0.5,PairFlip,std,10.0,Atropos,2,3,inverted_gradient,DelphiflZeroTrustV2,False,homogeneity,Weight,True
+label_skew,fl_usps,backdoor,0.2,0.5,PairFlip,std,10.0,sneaky_random2,2,3,inverted_gradient,DelphiflZeroTrustV2,False,homogeneity,Weight,True
